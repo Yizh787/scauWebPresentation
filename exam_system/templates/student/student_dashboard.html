@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>学生首页 - 四川农业大学考试系统</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="header">
+        <div class="logo-area">
+            <img src="../../static/images/logo.png" alt="四川农业大学">
+            <h1>在线考试系统</h1>
+        </div>
+        <div class="user-info">
+            <span class="username" id="username">用户名</span>
+            <div class="avatar">👨‍🎓</div>
+            <button class="logout-btn" onclick="Auth.logout()">退出</button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="error-msg" id="errorMsg"></div>
+        <div class="success-msg" id="successMsg"></div>
+
+        <div class="card">
+            <h2><span class="icon">📋</span> 待考试卷</h2>
+            <div class="exam-list" id="examList">
+                <div class="loading">加载中...</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2><span class="icon">📊</span> 考试记录</h2>
+            <div id="recordList">
+                <div class="loading">加载中...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-bar">
+        <div class="nav-item active" onclick="showTab('exam')">
+            <span class="icon">📋</span>
+            <span>试卷</span>
+        </div>
+        <div class="nav-item" onclick="showTab('record')">
+            <span class="icon">📊</span>
+            <span>记录</span>
+        </div>
+        <div class="nav-item" onclick="showTab('wrong')">
+            <span class="icon">📝</span>
+            <span>错题</span>
+        </div>
+    </div>
+
+    <script src="../../static/js/api.js"></script>
+    <script>
+        const user = Auth.requireAuth();
+        if (!user) {
+            window.location.href = '../login.html';
+        }
+
+        document.getElementById('username').textContent = user.username;
+
+        let currentTab = 'exam';
+
+        async function loadExams() {
+            try {
+                const result = await API.getExams();
+                const examList = document.getElementById('examList');
+
+                if (result.code === 200 && result.data.length > 0) {
+                    examList.innerHTML = result.data.map(exam => `
+                        <div class="exam-item" onclick="startExam(${exam.id})">
+                            <div>
+                                <div class="exam-name">${exam.exam_name}</div>
+                                <div class="exam-info">时长: ${exam.duration_minutes}分钟 | 总分: ${exam.total_score}</div>
+                            </div>
+                            <button class="start-btn">开始考试</button>
+                        </div>
+                    `).join('');
+                } else {
+                    examList.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>暂无待考试卷</p></div>';
+                }
+            } catch (err) {
+                document.getElementById('examList').innerHTML = '<div class="error-msg">加载失败，请刷新重试</div>';
+            }
+        }
+
+        async function loadRecords() {
+            try {
+                const result = await API.getExamRecords(user.id);
+                const recordList = document.getElementById('recordList');
+
+                if (result.code === 200 && result.data.length > 0) {
+                    recordList.innerHTML = result.data.map(record => {
+                        const scoreRate = record.record.score / record.record.total_score;
+                        const isPass = scoreRate >= 0.6;
+                        return `
+                            <div class="record-item">
+                                <div>
+                                    <div class="exam-name">${record.exam_name}</div>
+                                    <div class="exam-date">${formatDate(record.record.end_time)}</div>
+                                </div>
+                                <div class="score ${isPass ? '' : 'fail'}">${record.record.score}/${record.record.total_score}</div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    recordList.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>暂无考试记录</p></div>';
+                }
+            } catch (err) {
+                document.getElementById('recordList').innerHTML = '<div class="error-msg">加载失败，请刷新重试</div>';
+            }
+        }
+
+        async function loadWrongQuestions() {
+            try {
+                const result = await API.getWrongQuestions(user.id);
+                const recordList = document.getElementById('recordList');
+
+                if (result.code === 200 && result.data.length > 0) {
+                    recordList.innerHTML = result.data.map(item => `
+                        <div class="wrong-item" onclick="showExplain(${item.question.id})">
+                            <div class="question-text">${item.question.question_text}</div>
+                            <div class="meta">
+                                <span class="knowledge-tag">${item.question.knowledge || '未分类'}</span>
+                                <span>难度: ${'⭐'.repeat(item.question.difficulty)}</span>
+                            </div>
+                            <button class="ai-explain-btn" onclick="event.stopPropagation(); showExplain(${item.question.id})">🤖 AI讲解</button>
+                        </div>
+                    `).join('');
+                } else {
+                    recordList.innerHTML = '<div class="empty-state"><div class="icon">🎉</div><p>太棒了！暂无错题</p></div>';
+                }
+            } catch (err) {
+                document.getElementById('recordList').innerHTML = '<div class="error-msg">加载失败，请刷新重试</div>';
+            }
+        }
+
+        async function startExam(examId) {
+            try {
+                const result = await API.startExam(user.id, examId);
+                if (result.code === 200) {
+                    window.location.href = `exam.html?exam_id=${examId}&record_id=${result.data.record_id}`;
+                } else {
+                    showError(result.message);
+                }
+            } catch (err) {
+                showError('网络错误');
+            }
+        }
+
+        async function showExplain(questionId) {
+            window.location.href = `wrong_explain.html?question_id=${questionId}`;
+        }
+
+        function showTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            if (tab === 'exam') {
+                loadExams();
+                document.querySelector('.card:last-child h2').innerHTML = '<span class="icon">📊</span> 考试记录';
+                loadRecords();
+            } else if (tab === 'record') {
+                document.querySelector('.card:last-child h2').innerHTML = '<span class="icon">📊</span> 考试记录';
+                loadRecords();
+            } else if (tab === 'wrong') {
+                document.querySelector('.card:last-child h2').innerHTML = '<span class="icon">📝</span> 错题本';
+                loadWrongQuestions();
+            }
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('errorMsg');
+            el.textContent = msg;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 3000);
+        }
+
+        loadExams();
+    </script>
+</body>
+</html>

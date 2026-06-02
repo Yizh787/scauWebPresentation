@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>考试中 - 四川农业大学考试系统</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .exam-header {
+            position: sticky;
+            top: 0;
+            background: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+
+        .exam-header .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .exam-header .logo-area img {
+            width: 28px;
+            height: 28px;
+            object-fit: contain;
+        }
+
+        .exam-header .timer {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2d8a2d;
+        }
+
+        .exam-header .timer.warning {
+            color: #e74c3c;
+        }
+
+        .question-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .question-number {
+            display: inline-block;
+            background: linear-gradient(135deg, #1a5c1a 0%, #2d8a2d 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            margin-bottom: 15px;
+        }
+
+        .question-text {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .option-item:hover {
+            background: #e9ecef;
+        }
+
+        .option-item.selected {
+            background: rgba(45, 138, 45, 0.1);
+            border-color: #2d8a2d;
+        }
+
+        .option-item .option-label {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-right: 12px;
+            border: 2px solid #ddd;
+        }
+
+        .option-item.selected .option-label {
+            background: #2d8a2d;
+            color: white;
+            border-color: #2d8a2d;
+        }
+
+        .option-item .option-text {
+            flex: 1;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 15px 20px;
+            display: flex;
+            gap: 10px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        }
+
+        .bottom-bar .btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-prev {
+            background: #e9ecef;
+            color: #333;
+        }
+
+        .btn-next {
+            background: linear-gradient(135deg, #1a5c1a 0%, #2d8a2d 100%);
+            color: white;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: #e9ecef;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+        }
+
+        .progress-bar .fill {
+            height: 100%;
+            background: linear-gradient(135deg, #1a5c1a 0%, #2d8a2d 100%);
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar">
+        <div class="fill" id="progressFill" style="width: 0%"></div>
+    </div>
+
+    <div class="exam-header">
+        <div class="logo-area">
+            <img src="../../static/images/logo.png" alt="四川农业大学">
+            <h1 id="examTitle">考试中</h1>
+        </div>
+        <div class="timer" id="timer">60:00</div>
+    </div>
+
+    <div class="main-content" style="padding-bottom: 100px;">
+        <div id="questionContainer"></div>
+    </div>
+
+    <div class="bottom-bar">
+        <button class="btn btn-prev" id="prevBtn" onclick="prevQuestion()">上一题</button>
+        <button class="btn btn-next" id="nextBtn" onclick="nextQuestion()">下一题</button>
+        <button class="btn btn-submit" id="submitBtn" onclick="confirmSubmit()">交卷</button>
+    </div>
+
+    <script src="../../static/js/api.js"></script>
+    <script>
+        const user = Auth.requireAuth();
+        if (!user) {
+            window.location.href = '../login.html';
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const examId = urlParams.get('exam_id');
+        const recordId = urlParams.get('record_id');
+
+        let examData = null;
+        let currentIndex = 0;
+        let answers = {};
+        let timerInterval = null;
+        let remainingSeconds = 0;
+
+        async function loadExam() {
+            try {
+                const result = await API.getExamDetail(examId);
+                if (result.code === 200) {
+                    examData = result.data;
+                    document.getElementById('examTitle').textContent = examData.exam.exam_name;
+                    remainingSeconds = examData.exam.duration_minutes * 60;
+                    startTimer();
+                    renderQuestion();
+                }
+            } catch (err) {
+                alert('加载考试失败');
+                window.location.href = 'student_dashboard.html';
+            }
+        }
+
+        function startTimer() {
+            updateTimerDisplay();
+            timerInterval = setInterval(() => {
+                remainingSeconds--;
+                updateTimerDisplay();
+                if (remainingSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    submitExam();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(remainingSeconds / 60);
+            const seconds = remainingSeconds % 60;
+            const timerEl = document.getElementById('timer');
+            timerEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            if (remainingSeconds < 300) {
+                timerEl.classList.add('warning');
+            }
+        }
+
+        function renderQuestion() {
+            const questions = examData.questions;
+            const question = questions[currentIndex];
+
+            document.getElementById('progressFill').style.width = `${((currentIndex + 1) / questions.length) * 100}%`;
+
+            const container = document.getElementById('questionContainer');
+            container.innerHTML = `
+                <div class="question-card">
+                    <div class="question-number">第 ${currentIndex + 1} 题 / 共 ${questions.length} 题</div>
+                    <div class="question-text">${question.question_text}</div>
+                    <div class="options">
+                        <div class="option-item ${answers[question.id] === 'A' ? 'selected' : ''}" onclick="selectOption('A')">
+                            <div class="option-label">A</div>
+                            <div class="option-text">${question.option_a}</div>
+                        </div>
+                        <div class="option-item ${answers[question.id] === 'B' ? 'selected' : ''}" onclick="selectOption('B')">
+                            <div class="option-label">B</div>
+                            <div class="option-text">${question.option_b}</div>
+                        </div>
+                        <div class="option-item ${answers[question.id] === 'C' ? 'selected' : ''}" onclick="selectOption('C')">
+                            <div class="option-label">C</div>
+                            <div class="option-text">${question.option_c}</div>
+                        </div>
+                        <div class="option-item ${answers[question.id] === 'D' ? 'selected' : ''}" onclick="selectOption('D')">
+                            <div class="option-label">D</div>
+                            <div class="option-text">${question.option_d}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('prevBtn').disabled = currentIndex === 0;
+            document.getElementById('prevBtn').style.opacity = currentIndex === 0 ? 0.5 : 1;
+
+            if (currentIndex === questions.length - 1) {
+                document.getElementById('nextBtn').style.display = 'none';
+                document.getElementById('submitBtn').style.display = 'block';
+            } else {
+                document.getElementById('nextBtn').style.display = 'block';
+                document.getElementById('submitBtn').style.display = 'none';
+            }
+        }
+
+        function selectOption(option) {
+            const question = examData.questions[currentIndex];
+            answers[question.id] = option;
+            renderQuestion();
+        }
+
+        function prevQuestion() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                renderQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            if (currentIndex < examData.questions.length - 1) {
+                currentIndex++;
+                renderQuestion();
+            }
+        }
+
+        function confirmSubmit() {
+            if (confirm('确定要交卷吗？')) {
+                submitExam();
+            }
+        }
+
+        async function submitExam() {
+            clearInterval(timerInterval);
+
+            const answerList = Object.keys(answers).map(qid => ({
+                question_id: parseInt(qid),
+                answer: answers[qid]
+            }));
+
+            try {
+                const result = await API.submitExam(recordId, answerList);
+                if (result.code === 200) {
+                    window.location.href = `exam_result.html?record_id=${recordId}&score=${result.data.score}&total=${result.data.total_score}`;
+                } else {
+                    alert('提交失败: ' + result.message);
+                }
+            } catch (err) {
+                alert('提交失败，请稍后重试');
+            }
+        }
+
+        loadExam();
+    </script>
+</body>
+</html>

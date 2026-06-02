@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>错题讲解 - 四川农业大学考试系统</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .question-detail {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .question-text {
+            font-size: 16px;
+            line-height: 1.8;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-item {
+            padding: 12px 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .option-item .label {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-right: 12px;
+            font-size: 14px;
+        }
+
+        .option-item.correct {
+            background: #d4edda;
+        }
+
+        .option-item.correct .label {
+            background: #2d8a2d;
+            color: white;
+        }
+
+        .option-item.wrong {
+            background: #f8d7da;
+        }
+
+        .option-item.wrong .label {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .ai-explanation {
+            background: #e8f8e8;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .ai-explanation h3 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: #1a5c1a;
+        }
+
+        .ai-explanation p {
+            font-size: 14px;
+            line-height: 1.8;
+            color: #333;
+            white-space: pre-wrap;
+        }
+
+        .loading-ai {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .loading-ai .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e0e0e0;
+            border-top-color: #2d8a2d;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo-area">
+            <img src="../../static/images/logo.png" alt="四川农业大学">
+            <h1>错题讲解</h1>
+        </div>
+        <button class="logout-btn" onclick="goBack()">返回</button>
+    </div>
+
+    <div class="main-content">
+        <div class="question-detail" id="questionDetail">
+            <div class="loading">加载中...</div>
+        </div>
+
+        <div class="ai-explanation" id="aiExplanation">
+            <h3>🤖 AI 智能讲解</h3>
+            <div class="loading-ai" id="loadingAi">
+                <div class="spinner"></div>
+                <p>AI 正在分析题目，请稍候...</p>
+            </div>
+            <p id="explanationContent" style="display: none;"></p>
+        </div>
+    </div>
+
+    <script src="../../static/js/api.js"></script>
+    <script>
+        const user = Auth.requireAuth();
+        if (!user) {
+            window.location.href = '../login.html';
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const questionId = urlParams.get('question_id');
+
+        async function loadQuestion() {
+            try {
+                const result = await API.getWrongQuestions(user.id);
+                if (result.code === 200) {
+                    const item = result.data.find(i => i.question.id === parseInt(questionId));
+                    if (item) {
+                        renderQuestion(item);
+                        if (item.wrong_info.ai_explanation) {
+                            document.getElementById('loadingAi').style.display = 'none';
+                            document.getElementById('explanationContent').textContent = item.wrong_info.ai_explanation;
+                            document.getElementById('explanationContent').style.display = 'block';
+                        } else {
+                            loadAiExplanation(item.question.id, item.wrong_info.user_answer);
+                        }
+                    }
+                }
+            } catch (err) {
+                document.getElementById('questionDetail').innerHTML = '<div class="error-msg">加载失败</div>';
+            }
+        }
+
+        function renderQuestion(item) {
+            const q = item.question;
+            const userAnswer = item.wrong_info.user_answer;
+
+            let optionsHTML = '';
+            ['A', 'B', 'C', 'D'].forEach(label => {
+                const optionKey = `option_${label.toLowerCase()}`;
+                let className = 'option-item';
+                if (q.answer === label) {
+                    className += ' correct';
+                } else if (userAnswer === label) {
+                    className += ' wrong';
+                }
+                optionsHTML += `
+                    <div class="${className}">
+                        <div class="label">${label}</div>
+                        <div>${q[optionKey]}</div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('questionDetail').innerHTML = `
+                <div class="question-text">${q.question_text}</div>
+                <div class="options">${optionsHTML}</div>
+                <div style="margin-top: 15px; font-size: 14px; color: #999;">
+                    <span>正确答案: </span><strong style="color: #2d8a2d;">${q.answer}</strong>
+                    ${userAnswer ? `<span style="margin-left: 15px;">您的答案: </span><strong style="color: #e74c3c;">${userAnswer}</strong>` : ''}
+                </div>
+            `;
+        }
+
+        async function loadAiExplanation(questionId, userAnswer) {
+            try {
+                const result = await API.aiExplain(questionId, user.id, userAnswer);
+                document.getElementById('loadingAi').style.display = 'none';
+                if (result.code === 200) {
+                    document.getElementById('explanationContent').textContent = result.data.explanation;
+                } else {
+                    document.getElementById('explanationContent').textContent = 'AI 讲解加载失败，请稍后重试。';
+                }
+                document.getElementById('explanationContent').style.display = 'block';
+            } catch (err) {
+                document.getElementById('loadingAi').innerHTML = '<p>AI 讲解加载失败</p>';
+            }
+        }
+
+        function goBack() {
+            window.history.back();
+        }
+
+        loadQuestion();
+    </script>
+</body>
+</html>

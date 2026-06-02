@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>注册 - 四川农业大学考试系统</title>
+    <link rel="stylesheet" href="../static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="logo">
+                <img src="../static/images/logo.png" alt="四川农业大学校徽">
+                <h1>在线考试系统</h1>
+                <div class="school-name">四川农业大学</div>
+                <p>创建新账户</p>
+            </div>
+
+            <div class="error-msg"></div>
+            <div class="success-msg"></div>
+
+            <form id="registerForm">
+                <div class="form-group">
+                    <label>选择角色</label>
+                    <div class="role-selector">
+                        <label class="role-btn active">
+                            <input type="radio" name="role" value="0" checked>
+                            <div class="icon">👨‍🎓</div>
+                            <div class="text">学生</div>
+                        </label>
+                        <label class="role-btn">
+                            <input type="radio" name="role" value="1">
+                            <div class="icon">👨‍🏫</div>
+                            <div class="text">管理员</div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>用户名</label>
+                    <input type="text" id="username" placeholder="请输入学号或手机号（至少4位）" required>
+                </div>
+
+                <div class="form-group">
+                    <label>密码</label>
+                    <input type="password" id="password" placeholder="请输入密码（至少6位）" required>
+                </div>
+
+                <div class="form-group">
+                    <label>确认密码</label>
+                    <input type="password" id="confirmPassword" placeholder="请再次输入密码" required>
+                </div>
+
+                <button type="submit" class="btn" id="submitBtn">注 册</button>
+            </form>
+
+            <div class="link">
+                已有账户？<a href="login.html">立即登录</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-text">
+        © 2024 四川农业大学 教务处
+    </div>
+
+    <script src="../static/js/api.js"></script>
+    <script>
+        document.querySelectorAll('.role-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            hideMsg();
+
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const role = parseInt(document.querySelector('input[name="role"]:checked').value);
+            const submitBtn = document.getElementById('submitBtn');
+
+            if (username.length < 4) {
+                showError('用户名至少4位');
+                return;
+            }
+
+            if (password.length < 6) {
+                showError('密码至少6位');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showError('两次密码输入不一致');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = '注册中...';
+
+            try {
+                const result = await API.register(username, password, role);
+
+                if (result.code === 200) {
+                    showSuccess('注册成功！');
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 1000);
+                } else {
+                    showError(result.message || '注册失败');
+                }
+            } catch (err) {
+                showError('网络错误，请检查后端服务是否启动');
+                console.error(err);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '注 册';
+            }
+        });
+    </script>
+</body>
+</html>
