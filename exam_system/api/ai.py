@@ -6,6 +6,7 @@ from api import bp
 from models import db, Question, WrongQuestion
 import json
 import os
+import re
 
 AI_CONFIG_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'ai_config.json')
 
@@ -41,19 +42,19 @@ def get_ai_response(prompt, system_prompt=None):
         )
 
         if system_prompt:
-            from langchain.schema import HumanMessage, SystemMessage
+            from langchain_core.messages import HumanMessage, SystemMessage
             messages = [
                 SystemMessage(content=system_prompt),
                 HumanMessage(content=prompt)
             ]
-            response = llm(messages)
+            response = llm.invoke(messages)
             return response.content, None
         else:
             response = llm.invoke(prompt)
             return response.content, None
 
-    except ImportError:
-        return None, "请先安装 langchain-openai: pip install langchain-openai"
+    except ImportError as e:
+        return None, f"导入 langchain-openai 失败: {e}。请运行: pip install langchain-openai"
     except Exception as e:
         return None, f"AI 调用失败: {str(e)}"
 
@@ -176,7 +177,8 @@ def ai_generate_questions():
         return jsonify({'code': 500, 'message': error}), 500
 
     try:
-        result = json.loads(response_text)
+        cleaned = re.sub(r'```(?:json)?\s*', '', response_text).strip().rstrip('`').strip()
+        result = json.loads(cleaned)
         questions = result.get('questions', [])
 
         saved_questions = []

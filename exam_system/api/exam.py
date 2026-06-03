@@ -10,8 +10,17 @@ import json
 
 @bp.route('/exams', methods=['GET'])
 def get_exams():
-    """获取所有考试列表"""
+    """获取考试列表（可选 user_id 排除已完成）"""
+    user_id = request.args.get('user_id')
+
     exams = Exam.query.order_by(Exam.create_time.desc()).all()
+
+    if user_id:
+        completed_ids = {
+            r.exam_id for r in ExamRecord.query.filter_by(user_id=int(user_id)).filter(ExamRecord.end_time.isnot(None)).all()
+        }
+        exams = [e for e in exams if e.id not in completed_ids]
+
     return jsonify({
         'code': 200,
         'data': [exam.to_dict() for exam in exams]
@@ -226,6 +235,27 @@ def get_exam_records():
         result.append({
             'record': record.to_dict(),
             'exam_name': exam.exam_name if exam else '未知考试'
+        })
+
+    return jsonify({
+        'code': 200,
+        'data': result
+    })
+
+
+@bp.route('/exam/records/all', methods=['GET'])
+def get_all_exam_records():
+    """获取所有学生的考试记录（管理员）"""
+    records = ExamRecord.query.filter(ExamRecord.end_time.isnot(None)).order_by(ExamRecord.end_time.desc()).all()
+
+    result = []
+    for record in records:
+        exam = Exam.query.get(record.exam_id)
+        user = User.query.get(record.user_id)
+        result.append({
+            'record': record.to_dict(),
+            'exam_name': exam.exam_name if exam else '未知考试',
+            'username': user.username if user else '未知用户'
         })
 
     return jsonify({

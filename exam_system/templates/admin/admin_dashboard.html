@@ -211,6 +211,54 @@
         .ai-status .dot.inactive {
             background: #e74c3c;
         }
+
+        .ai-progress-wrap {
+            margin-top: 20px;
+        }
+
+        .ai-progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: #555;
+            margin-bottom: 8px;
+        }
+
+        .ai-progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .ai-progress-bar .fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #1a5c1a, #2d8a2d);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .ai-progress-steps {
+            margin-top: 12px;
+            font-size: 12px;
+            color: #888;
+        }
+
+        .ai-progress-steps span {
+            display: block;
+            padding: 2px 0;
+        }
+
+        .ai-progress-steps span.done {
+            color: #2d8a2d;
+        }
+
+        .ai-progress-steps span.active {
+            color: #1a5c1a;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
@@ -576,25 +624,86 @@
             e.preventDefault();
 
             const resultEl = document.getElementById('aiResult');
+            const contentEl = document.getElementById('aiResultContent');
             resultEl.style.display = 'block';
-            document.getElementById('aiResultContent').innerHTML = '<div class="loading">AI 正在生成题目，请稍候...</div>';
+
+            const count = parseInt(document.getElementById('aiCount').value);
+            const steps = [
+                '正在连接 AI 服务...',
+                '正在分析知识点...',
+                `正在生成 ${count} 道题目...`,
+                '正在整理生成结果...'
+            ];
+
+            // 渲染进度条
+            contentEl.innerHTML = `
+                <div class="ai-progress-wrap">
+                    <div class="ai-progress-label">
+                        <span id="aiProgressText">${steps[0]}</span>
+                        <span id="aiProgressPct">0%</span>
+                    </div>
+                    <div class="ai-progress-bar"><div class="fill" id="aiProgressFill"></div></div>
+                    <div class="ai-progress-steps" id="aiProgressSteps"></div>
+                </div>
+            `;
+
+            const fillEl = document.getElementById('aiProgressFill');
+            const pctEl = document.getElementById('aiProgressPct');
+            const textEl = document.getElementById('aiProgressText');
+            const stepsEl = document.getElementById('aiProgressSteps');
+
+            // 模拟进度
+            const stageTargets = [20, 45, 75, 92];
+            let currentStage = 0;
+            let progress = 0;
+
+            const timer = setInterval(() => {
+                if (currentStage >= stageTargets.length) return;
+                const target = stageTargets[currentStage];
+                if (progress < target) {
+                    progress += Math.random() * 3 + 1;
+                    if (progress > target) progress = target;
+                    fillEl.style.width = progress + '%';
+                    pctEl.textContent = Math.round(progress) + '%';
+                } else {
+                    // 进入下一阶段
+                    stepsEl.innerHTML += `<span class="done">✓ ${steps[currentStage]}</span>`;
+                    currentStage++;
+                    if (currentStage < steps.length) {
+                        textEl.textContent = steps[currentStage];
+                        stepsEl.innerHTML += `<span class="active">▸ ${steps[currentStage]}</span>`;
+                    }
+                }
+            }, 300);
+
+            // 立即显示第一步
+            stepsEl.innerHTML = `<span class="active">▸ ${steps[0]}</span>`;
 
             const data = {
                 knowledge: document.getElementById('aiKnowledge').value,
                 difficulty: parseInt(document.getElementById('aiDifficulty').value),
-                count: parseInt(document.getElementById('aiCount').value)
+                count: count
             };
 
             try {
                 const result = await API.aiGenerateQuestions(data.knowledge, data.difficulty, data.count);
+                clearInterval(timer);
+
                 if (result.code === 200) {
-                    document.getElementById('aiResultContent').innerHTML = `<p style="color: #2d8a2d;">成功生成 ${result.data.length} 道题目！</p>`;
+                    fillEl.style.width = '100%';
+                    pctEl.textContent = '100%';
+                    textEl.textContent = '生成完成';
+                    stepsEl.innerHTML += `<span class="done">✓ ${steps[currentStage] || steps[steps.length - 1]}</span>`;
+                    setTimeout(() => {
+                        contentEl.innerHTML = `<p style="color: #2d8a2d; font-weight: 600;">成功生成 ${result.data.length} 道题目！</p>`;
+                    }, 600);
                     loadQuestionStats();
                 } else {
-                    document.getElementById('aiResultContent').innerHTML = `<p style="color: #e74c3c;">${result.message}</p>`;
+                    contentEl.innerHTML = `<p style="color: #e74c3c;">${result.message}</p>`;
                 }
             } catch (err) {
-                document.getElementById('aiResultContent').innerHTML = '<p style="color: #e74c3c;">AI 生成失败，请检查配置</p>';
+                clearInterval(timer);
+                contentEl.innerHTML = '<p style="color: #e74c3c;">AI 生成失败，请检查配置</p>';
             }
         });
 
@@ -602,17 +711,27 @@
             const listEl = document.getElementById('examListContent');
             listEl.innerHTML = '<div class="loading">加载中...</div>';
             try {
-                const result = await API.getExamRecords(user.id);
+                const result = await API.getAllExamRecords();
                 if (result.code === 200 && result.data.length > 0) {
-                    listEl.innerHTML = result.data.map(record => `
-                        <div class="record-item">
-                            <div>
-                                <div class="exam-name">${record.exam_name}</div>
-                                <div class="exam-date">${record.created_at}</div>
+                    listEl.innerHTML = result.data.map(item => {
+                        const r = item.record;
+                        const scoreRate = r.total_score > 0 ? (r.score / r.total_score * 100).toFixed(1) : 0;
+                        const isPass = scoreRate >= 60;
+                        return `
+                            <div class="record-item" style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:#f8f9fa;border-radius:8px;margin-bottom:8px;">
+                                <div>
+                                    <div class="exam-name" style="font-weight:600;color:#333;">${item.exam_name}</div>
+                                    <div class="exam-date" style="font-size:12px;color:#999;margin-top:2px;">
+                                        学生: ${item.username} | ${r.end_time || ''}
+                                    </div>
+                                </div>
+                                <div style="text-align:right;">
+                                    <div style="font-size:18px;font-weight:600;color:${isPass ? '#2d8a2d' : '#e74c3c'};">${r.score}/${r.total_score}</div>
+                                    <div style="font-size:11px;color:#999;">${scoreRate}%</div>
+                                </div>
                             </div>
-                            <div class="score">${record.score || '-'}</div>
-                        </div>
-                    `).join('');
+                        `;
+                    }).join('');
                 } else {
                     listEl.innerHTML = '<div class="empty-state">暂无考试记录</div>';
                 }
