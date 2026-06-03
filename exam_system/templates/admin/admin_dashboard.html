@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>管理后台 - 四川农业大学考试系统</title>
-    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="/static/css/admin.css">
     <style>
         .admin-grid {
             display: grid;
@@ -248,7 +248,7 @@
                 <div class="title">AI 出题</div>
                 <div class="desc">智能生成题目</div>
             </div>
-            <div class="admin-card" onclick="location.href='exam_list.html'">
+            <div class="admin-card" onclick="showModal('examList')">
                 <div class="icon">📊</div>
                 <div class="title">考试记录</div>
                 <div class="desc">查看所有考试</div>
@@ -391,16 +391,30 @@
         </div>
     </div>
 
-    <script src="../../static/js/api.js"></script>
+    <div class="modal" id="examListModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📊 考试记录</h3>
+                <button class="modal-close" onclick="closeModal('examList')">×</button>
+            </div>
+            <div style="max-height: 400px; overflow-y: auto;">
+                <div id="examListContent">
+                    <div class="loading">加载中...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/api.js"></script>
     <script>
         const user = Auth.requireAuth();
         if (!user) {
-            window.location.href = '../login.html';
+            window.location.href = '/login';
         }
 
         if (user.role !== 1) {
             alert('无权限访问');
-            window.location.href = '../student/student_dashboard.html';
+            window.location.href = '/student/student_dashboard.html';
         }
 
         document.getElementById('username').textContent = user.username;
@@ -459,6 +473,8 @@
             document.getElementById(type + 'Modal').classList.add('show');
             if (type === 'exam') {
                 loadQuestionsForSelect();
+            } else if (type === 'examList') {
+                loadExamRecords();
             }
         }
 
@@ -581,6 +597,29 @@
                 document.getElementById('aiResultContent').innerHTML = '<p style="color: #e74c3c;">AI 生成失败，请检查配置</p>';
             }
         });
+
+        async function loadExamRecords() {
+            const listEl = document.getElementById('examListContent');
+            listEl.innerHTML = '<div class="loading">加载中...</div>';
+            try {
+                const result = await API.getExamRecords(user.id);
+                if (result.code === 200 && result.data.length > 0) {
+                    listEl.innerHTML = result.data.map(record => `
+                        <div class="record-item">
+                            <div>
+                                <div class="exam-name">${record.exam_name}</div>
+                                <div class="exam-date">${record.created_at}</div>
+                            </div>
+                            <div class="score">${record.score || '-'}</div>
+                        </div>
+                    `).join('');
+                } else {
+                    listEl.innerHTML = '<div class="empty-state">暂无考试记录</div>';
+                }
+            } catch (err) {
+                listEl.innerHTML = '<div class="error-msg">加载失败</div>';
+            }
+        }
 
         checkAiStatus();
         loadQuestionStats();

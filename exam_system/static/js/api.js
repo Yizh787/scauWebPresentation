@@ -140,13 +140,13 @@ const Auth = {
 
     logout() {
         localStorage.removeItem('user');
-        window.location.href = 'login.html';
+        window.location.href = '/login';
     },
 
     requireAuth() {
         const user = this.getUser();
         if (!user) {
-            window.location.href = 'login.html';
+            window.location.href = '/login';
             return null;
         }
         return user;

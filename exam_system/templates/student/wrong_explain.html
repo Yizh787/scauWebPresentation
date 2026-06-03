@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>错题讲解 - 四川农业大学考试系统</title>
-    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="/static/css/student.css">
     <style>
         .question-detail {
             background: white;
@@ -134,7 +134,7 @@
     <script>
         const user = Auth.requireAuth();
         if (!user) {
-            window.location.href = '../login.html';
+            window.location.href = '/login';
         }
 
         const urlParams = new URLSearchParams(window.location.search);

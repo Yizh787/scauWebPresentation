@@ -99,7 +99,7 @@ def login():
         'code': 200,
         'message': '登录成功',
         'data': {
-            'user_id': user.id,
+            'id': user.id,
             'username': user.username,
             'role': user.role,
             'avatar': user.avatar

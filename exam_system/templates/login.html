@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>登录 - 四川农业大学考试系统</title>
-    <link rel="stylesheet" href="../static/css/style.css">
+    <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
     <div class="container">
@@ -70,9 +70,9 @@
 
                     setTimeout(() => {
                         if (result.data.role === 1) {
-                            window.location.href = 'admin/admin_dashboard.html';
+                            window.location.href = '/admin/admin_dashboard.html';
                         } else {
-                            window.location.href = 'student/student_dashboard.html';
+                            window.location.href = '/student/student_dashboard.html';
                         }
                     }, 500);
                 } else {
