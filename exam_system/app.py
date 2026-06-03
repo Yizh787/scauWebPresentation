@@ -33,6 +33,26 @@ def create_app():
     def register_page():
         return render_template('register.html')
 
+    @app.route('/admin/admin_dashboard.html')
+    def admin_dashboard():
+        return render_template('admin/admin_dashboard.html')
+
+    @app.route('/student/student_dashboard.html')
+    def student_dashboard():
+        return render_template('student/student_dashboard.html')
+
+    @app.route('/student/exam.html')
+    def exam_page():
+        return render_template('student/exam.html')
+
+    @app.route('/student/exam_result.html')
+    def exam_result():
+        return render_template('student/exam_result.html')
+
+    @app.route('/student/wrong_explain.html')
+    def wrong_explain():
+        return render_template('student/wrong_explain.html')
+
     @app.route('/health')
     def health():
         return {'status': 'ok'}
