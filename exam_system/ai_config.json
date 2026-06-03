@@ -1,7 +1,0 @@
-{
-    "provider": "deepseek",
-    "api_key": "",
-    "base_url": "https://api.deepseek.com",
-    "model": "deepseek-chat",
-    "temperature": 0.7
-}

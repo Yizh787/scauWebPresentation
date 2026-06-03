@@ -41,10 +41,22 @@ def create_app():
 
 
 def init_database():
-    """初始化数据库表"""
+    """初始化数据库表并添加默认管理员账号"""
     app = create_app()
     with app.app_context():
         db.create_all()
+        
+        from models import User
+        import hashlib
+        
+        admin_user = User.query.filter_by(username='admin').first()
+        if not admin_user:
+            hashed_password = hashlib.sha256('admin123'.encode()).hexdigest()
+            admin = User(username='admin', password=hashed_password, role=1)
+            db.session.add(admin)
+            db.session.commit()
+            print("管理员账号创建成功：用户名 admin，密码 admin123")
+        
         print("数据库表创建成功！")
 
 
