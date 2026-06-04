@@ -72,6 +72,7 @@ def create_tables():
                     exam_name VARCHAR(100) NOT NULL,
                     total_score INT DEFAULT 0,
                     duration_minutes INT DEFAULT 60,
+                    shuffle_enabled TINYINT DEFAULT 0 COMMENT '0关闭乱序，1开启乱序',
                     create_time DATETIME DEFAULT CURRENT_TIMESTAMP
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """)
@@ -98,6 +99,7 @@ def create_tables():
                     total_score INT DEFAULT 0,
                     answers_detail TEXT COMMENT 'JSON格式存储答题详情',
                     wrong_questions TEXT COMMENT 'JSON格式存储错题ID列表',
+                    shuffle_data TEXT COMMENT 'JSON格式存储题目乱序和选项乱序映射',
                     start_time DATETIME,
                     end_time DATETIME,
                     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,

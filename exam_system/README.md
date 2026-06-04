@@ -18,6 +18,13 @@
 - 查看考试成绩与答题详情
 - 错题本与 AI 智能讲解
 
+### 智能防作弊系统（可选开启）
+- **管理员可控**：创建考试时可选择是否开启乱序模式
+- **题目乱序**：开启后每位考生看到的题目顺序随机打乱，每人不同
+- **选项乱序**：ABCD 选项位置随机排列，答案映射存储在数据库中
+- **提交还原**：学生提交答案时，系统自动将乱序答案还原为原始答案进行判分
+- **管理员无感**：管理员查看考试题目时仍显示原始顺序和选项
+
 ### 管理员功能
 
 管理后台包含 5 大功能模块：
@@ -202,7 +209,7 @@ exam_system/
 - **Question**: 题目表（id, question_text, option_a/b/c/d, answer, knowledge, difficulty, score, is_ai_generated）
 - **Exam**: 考试表（id, exam_name, total_score, duration_minutes, create_time）
 - **ExamQuestion**: 考试-题目关联表（id, exam_id, question_id, order_num）
-- **ExamRecord**: 考试记录表（id, user_id, exam_id, score, total_score, answers_detail, wrong_questions, start_time, end_time）
+- **ExamRecord**: 考试记录表（id, user_id, exam_id, score, total_score, answers_detail, wrong_questions, shuffle_data, start_time, end_time）
 - **WrongQuestion**: 错题表（id, user_id, question_id, user_answer, ai_explanation, add_time）
 
 ## 注意事项

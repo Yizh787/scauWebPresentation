@@ -6,6 +6,7 @@ from api import bp
 from models import db, Exam, ExamQuestion, ExamRecord, Question, WrongQuestion, User
 from datetime import datetime
 import json
+import random
 
 
 @bp.route('/students', methods=['GET'])
@@ -50,10 +51,12 @@ def get_exams():
 
 @bp.route('/exam/<int:exam_id>', methods=['GET'])
 def get_exam(exam_id):
-    """获取考试详情（含题目）"""
+    """获取考试详情（含题目），支持乱序防作弊"""
     exam = Exam.query.get(exam_id)
     if not exam:
         return jsonify({'code': 404, 'message': '考试不存在'}), 404
+
+    record_id = request.args.get('record_id')
 
     exam_questions = ExamQuestion.query.filter_by(exam_id=exam_id).order_by(ExamQuestion.order_num).all()
 
@@ -62,6 +65,41 @@ def get_exam(exam_id):
         question = Question.query.get(eq.question_id)
         if question:
             questions.append(question.to_dict())
+
+    # 如果传入 record_id，按乱序返回
+    if record_id:
+        record = ExamRecord.query.get(int(record_id))
+        if record and record.shuffle_data:
+            shuffle_info = json.loads(record.shuffle_data)
+            q_order = shuffle_info['question_order']
+            opt_maps = shuffle_info['option_maps']
+
+            # 按乱序排列题目
+            q_map = {q['id']: q for q in questions}
+            shuffled_questions = []
+            for qid in q_order:
+                if qid not in q_map:
+                    continue
+                q = q_map[qid].copy()
+                opt_map = opt_maps[str(qid)]
+                # 按乱序重排选项内容
+                orig = {
+                    'A': q['option_a'], 'B': q['option_b'],
+                    'C': q['option_c'], 'D': q['option_d']
+                }
+                q['option_a'] = orig[opt_map['A']]
+                q['option_b'] = orig[opt_map['B']]
+                q['option_c'] = orig[opt_map['C']]
+                q['option_d'] = orig[opt_map['D']]
+                # answer 也映射为乱序后的标签
+                orig_answer = q['answer']
+                # 找到 orig_answer 在 opt_map 中被映射到哪个 shuffled label
+                for shuffled_label, original_label in opt_map.items():
+                    if original_label == orig_answer:
+                        q['answer'] = shuffled_label
+                        break
+                shuffled_questions.append(q)
+            questions = shuffled_questions
 
     return jsonify({
         'code': 200,
@@ -83,6 +121,7 @@ def create_exam():
     exam_name = data.get('exam_name', '').strip()
     duration_minutes = data.get('duration_minutes', 60)
     question_ids = data.get('question_ids', [])
+    shuffle_enabled = int(data.get('shuffle_enabled', 0))
 
     if not exam_name:
         return jsonify({'code': 400, 'message': '考试名称不能为空'}), 400
@@ -99,7 +138,8 @@ def create_exam():
     new_exam = Exam(
         exam_name=exam_name,
         duration_minutes=duration_minutes,
-        total_score=total_score
+        total_score=total_score,
+        shuffle_enabled=shuffle_enabled
     )
     db.session.add(new_exam)
     db.session.flush()
@@ -150,10 +190,34 @@ def start_exam():
             }
         })
 
+    # 生成防作弊乱序数据（仅在开启乱序时）
+    exam_questions = ExamQuestion.query.filter_by(exam_id=exam_id).all()
+    question_ids = [eq.question_id for eq in exam_questions]
+
+    shuffle_data = None
+    if exam.shuffle_enabled:
+        # 题目乱序
+        shuffled_ids = question_ids[:]
+        random.shuffle(shuffled_ids)
+
+        # 选项乱序：每道题的 ABCD 随机打乱
+        original_labels = ['A', 'B', 'C', 'D']
+        option_maps = {}  # { question_id: { shuffled_label: original_label } }
+        for qid in question_ids:
+            perm = original_labels[:]
+            random.shuffle(perm)
+            option_maps[str(qid)] = {perm[i]: original_labels[i] for i in range(4)}
+
+        shuffle_data = json.dumps({
+            'question_order': shuffled_ids,
+            'option_maps': option_maps
+        }, ensure_ascii=False)
+
     record = ExamRecord(
         user_id=user_id,
         exam_id=exam_id,
         total_score=exam.total_score,
+        shuffle_data=shuffle_data,
         start_time=datetime.now()
     )
     db.session.add(record)
@@ -193,6 +257,14 @@ def submit_exam():
     exam = Exam.query.get(record.exam_id)
     exam_questions = ExamQuestion.query.filter_by(exam_id=record.exam_id).order_by(ExamQuestion.order_num).all()
 
+    # 加载乱序映射，构建反向映射（shuffled_label -> original_label）
+    inverse_map = {}
+    if record.shuffle_data:
+        shuffle_info = json.loads(record.shuffle_data)
+        opt_maps = shuffle_info.get('option_maps', {})
+        for qid_str, omap in opt_maps.items():
+            inverse_map[qid_str] = {v: k for k, v in omap.items()}
+
     score = 0
     wrong_list = []
 
@@ -207,7 +279,12 @@ def submit_exam():
                 user_answer = ans.get('answer')
                 break
 
-        if user_answer and user_answer.upper() == question.answer.upper():
+        # 将学生的乱序答案还原为原始答案
+        original_answer = user_answer
+        if user_answer and str(question.id) in inverse_map:
+            original_answer = inverse_map[str(question.id)].get(user_answer.upper(), user_answer)
+
+        if original_answer and original_answer.upper() == question.answer.upper():
             score += question.score
         else:
             wrong_list.append(question.id)

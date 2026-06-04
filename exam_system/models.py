@@ -67,6 +67,7 @@ class Exam(db.Model):
     exam_name = db.Column(db.String(100), nullable=False)
     total_score = db.Column(db.Integer, default=0)
     duration_minutes = db.Column(db.Integer, default=60)
+    shuffle_enabled = db.Column(db.SmallInteger, default=0)  # 0=关闭乱序 1=开启乱序
     create_time = db.Column(db.DateTime, default=datetime.now)
 
     def to_dict(self):
@@ -75,6 +76,7 @@ class Exam(db.Model):
             'exam_name': self.exam_name,
             'total_score': self.total_score,
             'duration_minutes': self.duration_minutes,
+            'shuffle_enabled': self.shuffle_enabled,
             'create_time': self.create_time.strftime('%Y-%m-%d %H:%M:%S') if self.create_time else None
         }
 
@@ -98,6 +100,7 @@ class ExamRecord(db.Model):
     total_score = db.Column(db.Integer, default=0)
     answers_detail = db.Column(db.Text)
     wrong_questions = db.Column(db.Text)
+    shuffle_data = db.Column(db.Text)  # 存储题目乱序和选项乱序映射（JSON）
     start_time = db.Column(db.DateTime)
     end_time = db.Column(db.DateTime)
 

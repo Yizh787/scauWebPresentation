@@ -64,11 +64,39 @@ def init_database():
     """初始化数据库表并添加默认管理员账号"""
     app = create_app()
     with app.app_context():
+        # 自动添加缺失的列（兼容旧数据库）
+        try:
+            import sqlite3
+            db_uri = app.config['SQLALCHEMY_DATABASE_URI']
+            if db_uri.startswith('sqlite:///'):
+                db_path = db_uri.replace('sqlite:///', '')
+                conn = sqlite3.connect(db_path)
+                cursor = conn.cursor()
+
+                # 检查并添加 exams.shuffle_enabled
+                cursor.execute("PRAGMA table_info(exams)")
+                cols = [col[1] for col in cursor.fetchall()]
+                if 'shuffle_enabled' not in cols:
+                    cursor.execute("ALTER TABLE exams ADD COLUMN shuffle_enabled SMALLINT DEFAULT 0")
+                    print("已添加 exams.shuffle_enabled 列")
+
+                # 检查并添加 exam_records.shuffle_data
+                cursor.execute("PRAGMA table_info(exam_records)")
+                cols = [col[1] for col in cursor.fetchall()]
+                if 'shuffle_data' not in cols:
+                    cursor.execute("ALTER TABLE exam_records ADD COLUMN shuffle_data TEXT")
+                    print("已添加 exam_records.shuffle_data 列")
+
+                conn.commit()
+                conn.close()
+        except Exception as e:
+            print(f"列迁移检查: {e}")
+
         db.create_all()
-        
+
         from models import User
         import hashlib
-        
+
         admin_user = User.query.filter_by(username='admin').first()
         if not admin_user:
             hashed_password = hashlib.sha256('admin123'.encode()).hexdigest()
@@ -76,7 +104,7 @@ def init_database():
             db.session.add(admin)
             db.session.commit()
             print("管理员账号创建成功：用户名 admin，密码 admin123")
-        
+
         print("数据库表创建成功！")
 
 

@@ -31,16 +31,18 @@ const API = {
         return res.json();
     },
 
-    async getExamDetail(examId) {
-        const res = await fetch(`${API_BASE_URL}/exam/${examId}`);
+    async getExamDetail(examId, recordId) {
+        let url = `${API_BASE_URL}/exam/${examId}`;
+        if (recordId) url += `?record_id=${recordId}`;
+        const res = await fetch(url);
         return res.json();
     },
 
-    async createExam(examName, durationMinutes, questionIds) {
+    async createExam(examName, durationMinutes, questionIds, shuffleEnabled = 0) {
         const res = await fetch(`${API_BASE_URL}/exam/create`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({exam_name: examName, duration_minutes: durationMinutes, question_ids: questionIds})
+            body: JSON.stringify({exam_name: examName, duration_minutes: durationMinutes, question_ids: questionIds, shuffle_enabled: shuffleEnabled})
         });
         return res.json();
     },

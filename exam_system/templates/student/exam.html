@@ -210,7 +210,7 @@
 
         async function loadExam() {
             try {
-                const result = await API.getExamDetail(examId);
+                const result = await API.getExamDetail(examId, recordId);
                 if (result.code === 200) {
                     examData = result.data;
                     document.getElementById('examTitle').textContent = examData.exam.exam_name;

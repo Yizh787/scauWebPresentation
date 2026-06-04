@@ -652,6 +652,12 @@
                     <input type="number" id="eDuration" value="60" min="10" max="180">
                 </div>
                 <div class="form-row">
+                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                        <input type="checkbox" id="eShuffle" style="width:18px;height:18px;accent-color:#2d8a2d;">
+                        🔀 开启防作弊乱序（题目和选项随机打乱）
+                    </label>
+                </div>
+                <div class="form-row">
                     <label>选择题目</label>
                     <div class="question-list" id="questionSelectList">
                         <div class="loading">加载中...</div>
@@ -1052,11 +1058,12 @@
             const data = {
                 exam_name: document.getElementById('eName').value,
                 duration_minutes: parseInt(document.getElementById('eDuration').value),
-                question_ids: selectedQuestions
+                question_ids: selectedQuestions,
+                shuffle_enabled: document.getElementById('eShuffle').checked ? 1 : 0
             };
 
             try {
-                const result = await API.createExam(data.exam_name, data.duration_minutes, data.question_ids);
+                const result = await API.createExam(data.exam_name, data.duration_minutes, data.question_ids, data.shuffle_enabled);
                 if (result.code === 200) {
                     alert('考试创建成功');
                     closeModal('exam');
@@ -1166,9 +1173,29 @@
                         listHtml += `</div>`;
                         listHtml += `<div style="font-size: 12px; color: #999; margin-bottom: 12px;">已选: <span id="aiSelectedCount">${generatedQuestions.length}</span> 题</div>`;
                         listHtml += `
-                            <div class="btn-group">
+                            <div class="btn-group" id="aiActionBtns">
                                 <button type="button" class="btn btn-secondary" onclick="closeModal('ai')">加入题库</button>
-                                <button type="button" class="btn btn-primary" onclick="createExamFromAi()">📋 一键创建考试</button>
+                                <button type="button" class="btn btn-primary" onclick="showAiCreateExamForm()">📋 一键创建考试</button>
+                            </div>
+                            <div id="aiCreateExamForm" style="display:none;margin-top:15px;padding:15px;background:#f8f9fa;border-radius:10px;">
+                                <div class="form-row">
+                                    <label>考试名称</label>
+                                    <input type="text" id="aiExamName" placeholder="请输入考试名称">
+                                </div>
+                                <div class="form-row">
+                                    <label>考试时长（分钟）</label>
+                                    <input type="number" id="aiExamDuration" value="60" min="1" max="300">
+                                </div>
+                                <div class="form-row">
+                                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                                        <input type="checkbox" id="aiExamShuffle" style="width:18px;height:18px;accent-color:#2d8a2d;">
+                                        🔀 开启防作弊乱序（题目和选项随机打乱）
+                                    </label>
+                                </div>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-secondary" onclick="hideAiCreateExamForm()">取消</button>
+                                    <button type="button" class="btn btn-primary" onclick="submitAiCreateExam()">✅ 确认创建</button>
+                                </div>
                             </div>
                         `;
                         contentEl.innerHTML = listHtml;
@@ -1202,6 +1229,7 @@
                                     <span>📝 ${item.question_count} 题</span>
                                     <span>💯 总分 ${e.total_score} 分</span>
                                     <span>⏱️ ${e.duration_minutes} 分钟</span>
+                                    <span>${e.shuffle_enabled ? '🔀 已开启乱序' : '📄 顺序固定'}</span>
                                     <span>👥 ${totalPeople} 人参加（${item.completed_count} 人完成，${item.in_progress_count} 人进行中）</span>
                                 </div>
                                 <div style="font-size:12px;color:#999;margin-bottom:8px;">创建时间：${e.create_time}</div>
@@ -1452,29 +1480,42 @@
             showModal('questionDetail');
         }
 
-        async function createExamFromAi() {
+        function showAiCreateExamForm() {
             if (!window._aiSelectedQuestions || window._aiSelectedQuestions.length === 0) {
                 alert('请至少选择一道题目');
                 return;
             }
-
             const aiKnowledge = document.getElementById('aiKnowledge').value;
             const defaultName = aiKnowledge ? `${aiKnowledge}考试` : 'AI生成考试';
-            const examName = prompt('请输入考试名称：', defaultName);
-            if (!examName || !examName.trim()) return;
+            document.getElementById('aiExamName').value = defaultName;
+            document.getElementById('aiExamDuration').value = 60;
+            document.getElementById('aiExamShuffle').checked = false;
+            document.getElementById('aiCreateExamForm').style.display = 'block';
+            document.getElementById('aiActionBtns').style.display = 'none';
+        }
 
-            const durationStr = prompt('请输入考试时长（分钟）：', '60');
-            if (!durationStr) return;
-            const duration = parseInt(durationStr);
+        function hideAiCreateExamForm() {
+            document.getElementById('aiCreateExamForm').style.display = 'none';
+            document.getElementById('aiActionBtns').style.display = 'flex';
+        }
+
+        async function submitAiCreateExam() {
+            const examName = document.getElementById('aiExamName').value.trim();
+            if (!examName) {
+                alert('请输入考试名称');
+                return;
+            }
+            const duration = parseInt(document.getElementById('aiExamDuration').value);
             if (isNaN(duration) || duration < 1) {
                 alert('请输入有效的时长');
                 return;
             }
+            const shuffleEnabled = document.getElementById('aiExamShuffle').checked ? 1 : 0;
 
             try {
-                const result = await API.createExam(examName.trim(), duration, window._aiSelectedQuestions);
+                const result = await API.createExam(examName, duration, window._aiSelectedQuestions, shuffleEnabled);
                 if (result.code === 200) {
-                    alert(`考试"${examName.trim()}"创建成功！\n共 ${window._aiSelectedQuestions.length} 题，时长 ${duration} 分钟`);
+                    alert(`考试"${examName}"创建成功！\n共 ${window._aiSelectedQuestions.length} 题，时长 ${duration} 分钟${shuffleEnabled ? '\n已开启防作弊乱序' : ''}`);
                     closeModal('ai');
                     loadQuestionStats();
                 } else {
