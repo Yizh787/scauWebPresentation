@@ -73,6 +73,23 @@ const API = {
         return res.json();
     },
 
+    async getExamsManage() {
+        const res = await fetch(`${API_BASE_URL}/exams/manage`);
+        return res.json();
+    },
+
+    async deleteExam(examId) {
+        const res = await fetch(`${API_BASE_URL}/exam/${examId}/delete`, {
+            method: 'DELETE'
+        });
+        return res.json();
+    },
+
+    async getStudents() {
+        const res = await fetch(`${API_BASE_URL}/students`);
+        return res.json();
+    },
+
     async getWrongQuestions(userId) {
         const res = await fetch(`${API_BASE_URL}/wrong_questions?user_id=${userId}`);
         return res.json();
@@ -89,6 +106,15 @@ const API = {
     async createQuestion(questionData) {
         const res = await fetch(`${API_BASE_URL}/question/create`, {
             method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(questionData)
+        });
+        return res.json();
+    },
+
+    async updateQuestion(questionId, questionData) {
+        const res = await fetch(`${API_BASE_URL}/question/update/${questionId}`, {
+            method: 'PUT',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(questionData)
         });

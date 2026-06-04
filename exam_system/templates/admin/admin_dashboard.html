@@ -188,6 +188,265 @@
             margin-top: 2px;
         }
 
+        .question-actions {
+            display: flex;
+            gap: 6px;
+            margin-left: 10px;
+        }
+
+        .question-actions .btn-sm {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .btn-view {
+            background: #e8f5e9;
+            color: #2d8a2d;
+        }
+
+        .btn-view:hover {
+            background: #c8e6c9;
+        }
+
+        .btn-del {
+            background: #fdecea;
+            color: #e74c3c;
+        }
+
+        .btn-del:hover {
+            background: #f5c6cb;
+        }
+
+        .detail-answer {
+            display: inline-block;
+            padding: 4px 14px;
+            background: linear-gradient(135deg, #1a5c1a, #2d8a2d);
+            color: white;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .option-row {
+            padding: 10px 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .option-row.correct {
+            background: #e8f5e9;
+            border-left: 3px solid #2d8a2d;
+            font-weight: 600;
+        }
+
+        .difficulty-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .difficulty-1 { background: #e8f5e9; color: #27ae60; }
+        .difficulty-2 { background: #fff3e0; color: #f39c12; }
+        .difficulty-3 { background: #fdecea; color: #e74c3c; }
+
+        .exam-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid #e9ecef;
+        }
+
+        .exam-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .exam-card-header h4 {
+            font-size: 16px;
+            color: #1a5c1a;
+            margin: 0;
+        }
+
+        .exam-card-stats {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 10px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .exam-card-stats span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .exam-participants {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .participant-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 10px;
+            background: white;
+            border-radius: 6px;
+            margin-bottom: 4px;
+            font-size: 13px;
+        }
+
+        .participant-score {
+            font-weight: 600;
+        }
+
+        .score-pass { color: #2d8a2d; }
+        .score-fail { color: #e74c3c; }
+
+        .exam-card-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            justify-content: flex-end;
+        }
+
+        .exam-card-actions .btn-sm {
+            padding: 5px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .student-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 14px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            transition: background 0.2s;
+        }
+
+        .student-row:hover {
+            background: #e8f5e9;
+        }
+
+        .student-info {
+            flex: 1;
+        }
+
+        .student-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .student-meta {
+            font-size: 12px;
+            color: #999;
+            margin-top: 2px;
+        }
+
+        .student-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .record-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .record-card .record-info .exam-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .record-card .record-info .record-time {
+            font-size: 12px;
+            color: #999;
+            margin-top: 2px;
+        }
+
+        .record-card .record-score {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .view-question-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 10px;
+            border-left: 4px solid #2d8a2d;
+        }
+
+        .view-question-card .q-number {
+            display: inline-block;
+            background: #2d8a2d;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 24px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        .view-question-card .q-text {
+            font-size: 14px;
+            color: #333;
+            font-weight: 500;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        .view-option {
+            padding: 6px 10px;
+            margin-bottom: 4px;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #555;
+            background: white;
+        }
+
+        .view-option.is-correct {
+            background: #e8f5e9;
+            color: #1a5c1a;
+            font-weight: 600;
+            border-left: 3px solid #2d8a2d;
+        }
+
+        .view-question-meta {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+            font-size: 12px;
+            color: #999;
+        }
+
         .ai-status {
             display: flex;
             align-items: center;
@@ -281,7 +540,7 @@
         </div>
 
         <div class="admin-grid">
-            <div class="admin-card" onclick="showModal('question')">
+            <div class="admin-card" onclick="showModal('questionList')">
                 <div class="icon">📝</div>
                 <div class="title">题库管理</div>
                 <div class="desc">添加、编辑、删除题目</div>
@@ -296,10 +555,15 @@
                 <div class="title">AI 出题</div>
                 <div class="desc">智能生成题目</div>
             </div>
-            <div class="admin-card" onclick="showModal('examList')">
+            <div class="admin-card" onclick="showModal('examManage')">
                 <div class="icon">📊</div>
-                <div class="title">考试记录</div>
-                <div class="desc">查看所有考试</div>
+                <div class="title">考试管理</div>
+                <div class="desc">查看、管理所有考试</div>
+            </div>
+            <div class="admin-card" onclick="showModal('studentManage')">
+                <div class="icon">👥</div>
+                <div class="title">学生管理</div>
+                <div class="desc">查看学生及考试记录</div>
             </div>
         </div>
 
@@ -453,6 +717,148 @@
         </div>
     </div>
 
+    <!-- 考试管理弹窗 -->
+    <div class="modal" id="examManageModal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3>📊 考试管理</h3>
+                <button class="modal-close" onclick="closeModal('examManage')">×</button>
+            </div>
+            <div style="max-height: 500px; overflow-y: auto;" id="examManageContent">
+                <div class="loading">加载中...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 考试题目只读查看弹窗 -->
+    <div class="modal" id="examQuestionsModal">
+        <div class="modal-content" style="max-width: 650px;">
+            <div class="modal-header">
+                <h3 id="examQuestionsTitle">考试题目</h3>
+                <button class="modal-close" onclick="closeModal('examQuestions')">×</button>
+            </div>
+            <div style="max-height: 500px; overflow-y: auto;" id="examQuestionsContent">
+                <div class="loading">加载中...</div>
+            </div>
+            <div class="btn-group">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('examQuestions')">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 学生管理弹窗 -->
+    <div class="modal" id="studentManageModal">
+        <div class="modal-content" style="max-width: 650px;">
+            <div class="modal-header">
+                <h3>👥 学生管理</h3>
+                <button class="modal-close" onclick="closeModal('studentManage')">×</button>
+            </div>
+            <div style="max-height: 500px; overflow-y: auto;" id="studentManageContent">
+                <div class="loading">加载中...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 学生考试记录弹窗 -->
+    <div class="modal" id="studentRecordsModal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 id="studentRecordsTitle">考试记录</h3>
+                <button class="modal-close" onclick="closeModal('studentRecords')">×</button>
+            </div>
+            <div style="max-height: 500px; overflow-y: auto;" id="studentRecordsContent">
+                <div class="loading">加载中...</div>
+            </div>
+            <div class="btn-group">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('studentRecords')">返回</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 题目列表弹窗 -->
+    <div class="modal" id="questionListModal">
+        <div class="modal-content" style="max-width: 650px;">
+            <div class="modal-header">
+                <h3>📝 题库管理</h3>
+                <button class="modal-close" onclick="closeModal('questionList')">×</button>
+            </div>
+            <div style="max-height: 450px; overflow-y: auto;" id="questionListContent">
+                <div class="loading">加载中...</div>
+            </div>
+            <div class="btn-group">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('questionList')">关闭</button>
+                <button type="button" class="btn btn-primary" onclick="closeModal('questionList');showModal('question')">➕ 添加新题目</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 题目详情/编辑弹窗 -->
+    <div class="modal" id="questionDetailModal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 id="detailTitle">题目详情</h3>
+                <button class="modal-close" onclick="closeDetailAndReturn()">×</button>
+            </div>
+            <form id="questionEditForm">
+                <input type="hidden" id="editQuestionId">
+                <div class="form-row">
+                    <label>题目内容</label>
+                    <textarea id="editText" placeholder="请输入题目内容" required></textarea>
+                </div>
+                <div class="form-row">
+                    <label>选项</label>
+                    <div id="editOptionsPreview"></div>
+                </div>
+                <div class="form-row">
+                    <label>选项 A</label>
+                    <input type="text" id="editA" placeholder="请输入A选项" required>
+                </div>
+                <div class="form-row">
+                    <label>选项 B</label>
+                    <input type="text" id="editB" placeholder="请输入B选项" required>
+                </div>
+                <div class="form-row">
+                    <label>选项 C</label>
+                    <input type="text" id="editC" placeholder="请输入C选项" required>
+                </div>
+                <div class="form-row">
+                    <label>选项 D</label>
+                    <input type="text" id="editD" placeholder="请输入D选项" required>
+                </div>
+                <div class="form-row">
+                    <label>正确答案</label>
+                    <select id="editAnswer" required>
+                        <option value="">请选择</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                        <option value="D">D</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label>知识点</label>
+                    <input type="text" id="editKnowledge" placeholder="如：Python循环">
+                </div>
+                <div class="form-row">
+                    <label>难度</label>
+                    <select id="editDifficulty">
+                        <option value="1">⭐ 简单</option>
+                        <option value="2">⭐⭐ 中等</option>
+                        <option value="3">⭐⭐⭐ 困难</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label>分值</label>
+                    <input type="number" id="editScore" value="2" min="1" max="10">
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-secondary" onclick="closeDetailAndReturn()">取消</button>
+                    <button type="submit" class="btn btn-primary">💾 保存修改</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="/static/js/api.js"></script>
     <script>
         const user = Auth.requireAuth();
@@ -468,6 +874,7 @@
         document.getElementById('username').textContent = user.username;
 
         let selectedQuestions = [];
+        let detailReturnTo = null; // 'exam' or 'questionList' or null
 
         async function checkAiStatus() {
             try {
@@ -523,6 +930,12 @@
                 loadQuestionsForSelect();
             } else if (type === 'examList') {
                 loadExamRecords();
+            } else if (type === 'questionList') {
+                loadQuestionList();
+            } else if (type === 'examManage') {
+                loadExamManage();
+            } else if (type === 'studentManage') {
+                loadStudentList();
             }
         }
 
@@ -538,17 +951,52 @@
                 if (result.code === 200) {
                     selectedQuestions = [];
                     listEl.innerHTML = result.data.questions.map(q => `
-                        <div class="question-item">
+                        <div class="question-item" style="justify-content: space-between;">
                             <input type="checkbox" onchange="toggleQuestion(${q.id}, ${q.score})">
-                            <div class="info">
-                                <div class="text">${q.question_text.substring(0, 50)}...</div>
+                            <div class="info" style="flex:1; min-width:0;">
+                                <div class="text" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${q.question_text}</div>
                                 <div class="meta">${q.knowledge || '未分类'} | ${q.score}分</div>
                             </div>
+                            <button class="btn-sm btn-view" style="margin-left:8px;" onclick="event.preventDefault();viewQuestionFromSelect(${q.id})">查看</button>
                         </div>
                     `).join('');
                 }
             } catch (err) {
                 document.getElementById('questionSelectList').innerHTML = '<div class="error-msg">加载失败</div>';
+            }
+        }
+
+        async function viewQuestionFromSelect(id) {
+            try {
+                const result = await API.getQuestions(1, 200);
+                if (result.code !== 200) return;
+                const q = result.data.questions.find(item => item.id === id);
+                if (!q) { alert('题目不存在'); return; }
+
+                document.getElementById('editQuestionId').value = q.id;
+                document.getElementById('editText').value = q.question_text;
+                document.getElementById('editA').value = q.option_a;
+                document.getElementById('editB').value = q.option_b;
+                document.getElementById('editC').value = q.option_c;
+                document.getElementById('editD').value = q.option_d;
+                document.getElementById('editAnswer').value = q.answer;
+                document.getElementById('editKnowledge').value = q.knowledge || '';
+                document.getElementById('editDifficulty').value = q.difficulty;
+                document.getElementById('editScore').value = q.score;
+
+                const options = {A: q.option_a, B: q.option_b, C: q.option_c, D: q.option_d};
+                document.getElementById('editOptionsPreview').innerHTML = ['A','B','C','D'].map(key => {
+                    const isCorrect = key === q.answer;
+                    return `<div class="option-row ${isCorrect ? 'correct' : ''}">
+                        <strong>${key}.</strong> ${options[key]} ${isCorrect ? '✓ 正确答案' : ''}
+                    </div>`;
+                }).join('');
+
+                document.getElementById('detailTitle').textContent = `题目 #${q.id} 详情`;
+                detailReturnTo = 'exam';
+                showModal('questionDetail');
+            } catch (err) {
+                alert('加载题目详情失败');
             }
         }
 
@@ -694,8 +1142,36 @@
                     pctEl.textContent = '100%';
                     textEl.textContent = '生成完成';
                     stepsEl.innerHTML += `<span class="done">✓ ${steps[currentStage] || steps[steps.length - 1]}</span>`;
+
+                    const generatedQuestions = result.data;
+                    // 缓存生成的题目供后续使用
+                    window._aiGeneratedQuestions = generatedQuestions;
+                    window._aiSelectedQuestions = generatedQuestions.map(q => q.id);
+
                     setTimeout(() => {
-                        contentEl.innerHTML = `<p style="color: #2d8a2d; font-weight: 600;">成功生成 ${result.data.length} 道题目！</p>`;
+                        let listHtml = `<p style="color: #2d8a2d; font-weight: 600; margin-bottom: 12px;">成功生成 ${generatedQuestions.length} 道题目！已自动加入题库。</p>`;
+                        listHtml += `<div style="max-height: 260px; overflow-y: auto; margin-bottom: 12px;" id="aiQuestionList">`;
+                        generatedQuestions.forEach(q => {
+                            listHtml += `
+                                <div class="question-item" style="justify-content: space-between;">
+                                    <input type="checkbox" checked onchange="toggleAiQuestion(${q.id})" data-ai-qid="${q.id}">
+                                    <div class="info" style="flex:1; min-width:0;">
+                                        <div class="text" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${q.question_text}</div>
+                                        <div class="meta">${q.knowledge || '未分类'} | ${q.score}分</div>
+                                    </div>
+                                    <button class="btn-sm btn-view" style="margin-left:8px;" onclick="viewAiQuestion(${q.id})">查看</button>
+                                </div>
+                            `;
+                        });
+                        listHtml += `</div>`;
+                        listHtml += `<div style="font-size: 12px; color: #999; margin-bottom: 12px;">已选: <span id="aiSelectedCount">${generatedQuestions.length}</span> 题</div>`;
+                        listHtml += `
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-secondary" onclick="closeModal('ai')">加入题库</button>
+                                <button type="button" class="btn btn-primary" onclick="createExamFromAi()">📋 一键创建考试</button>
+                            </div>
+                        `;
+                        contentEl.innerHTML = listHtml;
                     }, 600);
                     loadQuestionStats();
                 } else {
@@ -706,6 +1182,191 @@
                 contentEl.innerHTML = '<p style="color: #e74c3c;">AI 生成失败，请检查配置</p>';
             }
         });
+
+        async function loadExamManage() {
+            const contentEl = document.getElementById('examManageContent');
+            contentEl.innerHTML = '<div class="loading">加载中...</div>';
+            try {
+                const result = await API.getExamsManage();
+                if (result.code === 200 && result.data.length > 0) {
+                    contentEl.innerHTML = result.data.map(item => {
+                        const e = item.exam;
+                        const totalPeople = item.completed_count + item.in_progress_count;
+                        let html = `
+                            <div class="exam-card">
+                                <div class="exam-card-header">
+                                    <h4>${e.exam_name}</h4>
+                                    <span style="font-size:12px;color:#999;">#${e.id}</span>
+                                </div>
+                                <div class="exam-card-stats">
+                                    <span>📝 ${item.question_count} 题</span>
+                                    <span>💯 总分 ${e.total_score} 分</span>
+                                    <span>⏱️ ${e.duration_minutes} 分钟</span>
+                                    <span>👥 ${totalPeople} 人参加（${item.completed_count} 人完成，${item.in_progress_count} 人进行中）</span>
+                                </div>
+                                <div style="font-size:12px;color:#999;margin-bottom:8px;">创建时间：${e.create_time}</div>
+                        `;
+                        if (item.participants.length > 0) {
+                            html += `
+                                <div class="exam-participants" id="participants-${e.id}">
+                                    <div style="font-size:13px;font-weight:600;color:#333;margin-bottom:6px;">考试成绩：</div>
+                            `;
+                            item.participants.sort((a, b) => b.score - a.score);
+                            item.participants.forEach((p, idx) => {
+                                const rate = p.total_score > 0 ? (p.score / p.total_score * 100).toFixed(1) : 0;
+                                const isPass = rate >= 60;
+                                html += `
+                                    <div class="participant-row">
+                                        <span>${idx + 1}. ${p.username}</span>
+                                        <span class="participant-score ${isPass ? 'score-pass' : 'score-fail'}">${p.score}/${p.total_score} (${rate}%)</span>
+                                    </div>
+                                `;
+                            });
+                            html += `</div>`;
+                        } else {
+                            html += `<div style="font-size:13px;color:#999;">暂无人参加</div>`;
+                        }
+                        html += `
+                                <div class="exam-card-actions">
+                                    <button class="btn-sm btn-view" onclick="viewExamQuestions(${e.id}, '${e.exam_name.replace(/'/g, "\\'")}')">📋 查看题目</button>
+                                    <button class="btn-sm btn-del" onclick="deleteExamById(${e.id}, '${e.exam_name.replace(/'/g, "\\'")}')">🗑️ 删除考试</button>
+                                </div>
+                            </div>
+                        `;
+                        return html;
+                    }).join('');
+                } else {
+                    contentEl.innerHTML = '<div class="empty-state">暂无考试</div>';
+                }
+            } catch (err) {
+                contentEl.innerHTML = '<div class="error-msg">加载失败</div>';
+            }
+        }
+
+        async function deleteExamById(id, name) {
+            if (!confirm(`确定删除考试"${name}"吗？\n该考试的所有记录将被一并删除，此操作不可撤销。`)) return;
+            try {
+                const result = await API.deleteExam(id);
+                if (result.code === 200) {
+                    loadExamManage();
+                } else {
+                    alert(result.message || '删除失败');
+                }
+            } catch (err) {
+                alert('删除失败');
+            }
+        }
+
+        async function loadStudentList() {
+            const contentEl = document.getElementById('studentManageContent');
+            contentEl.innerHTML = '<div class="loading">加载中...</div>';
+            try {
+                const result = await API.getStudents();
+                if (result.code === 200 && result.data.length > 0) {
+                    contentEl.innerHTML = result.data.map(s => `
+                        <div class="student-row">
+                            <div class="student-info">
+                                <div class="student-name">👤 ${s.username}</div>
+                                <div class="student-meta">注册时间：${s.create_time || '未知'} | 已参加 ${s.exam_count} 场考试</div>
+                            </div>
+                            <div class="student-actions">
+                                <button class="btn-sm btn-view" onclick="viewStudentRecords(${s.id}, '${s.username.replace(/'/g, "\\'")}')">📋 考试记录</button>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    contentEl.innerHTML = '<div class="empty-state">暂无学生</div>';
+                }
+            } catch (err) {
+                contentEl.innerHTML = '<div class="error-msg">加载失败</div>';
+            }
+        }
+
+        async function viewStudentRecords(studentId, studentName) {
+            const contentEl = document.getElementById('studentRecordsContent');
+            document.getElementById('studentRecordsTitle').textContent = `📋 ${studentName} 的考试记录`;
+            contentEl.innerHTML = '<div class="loading">加载中...</div>';
+            closeModal('studentManage');
+            showModal('studentRecords');
+
+            try {
+                const result = await API.getExamRecords(studentId);
+                if (result.code === 200 && result.data.length > 0) {
+                    contentEl.innerHTML = result.data.map(item => {
+                        const r = item.record;
+                        const rate = r.total_score > 0 ? (r.score / r.total_score * 100).toFixed(1) : 0;
+                        const isPass = rate >= 60;
+                        return `
+                            <div class="record-card">
+                                <div class="record-info">
+                                    <div class="exam-name">${item.exam_name}</div>
+                                    <div class="record-time">${r.end_time || '进行中'}</div>
+                                </div>
+                                <div style="text-align:right;">
+                                    <div class="record-score" style="color:${isPass ? '#2d8a2d' : '#e74c3c'};">${r.score}/${r.total_score}</div>
+                                    <div style="font-size:12px;color:${isPass ? '#2d8a2d' : '#e74c3c'};">${rate}% ${isPass ? '✓ 及格' : '✗ 不及格'}</div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    contentEl.innerHTML = '<div class="empty-state">该学生暂无考试记录</div>';
+                }
+            } catch (err) {
+                contentEl.innerHTML = '<div class="error-msg">加载失败</div>';
+            }
+        }
+
+        async function viewExamQuestions(examId, examName) {
+            const contentEl = document.getElementById('examQuestionsContent');
+            document.getElementById('examQuestionsTitle').textContent = `📋 ${examName} - 题目详情`;
+            contentEl.innerHTML = '<div class="loading">加载中...</div>';
+            showModal('examQuestions');
+
+            try {
+                const result = await API.getExamDetail(examId);
+                if (result.code === 200) {
+                    const questions = result.data.questions;
+                    if (questions.length === 0) {
+                        contentEl.innerHTML = '<div class="empty-state">该考试暂无题目</div>';
+                        return;
+                    }
+                    const difficultyLabels = {1: '⭐ 简单', 2: '⭐⭐ 中等', 3: '⭐⭐⭐ 困难'};
+                    contentEl.innerHTML = questions.map((q, idx) => {
+                        const options = [
+                            {key: 'A', text: q.option_a},
+                            {key: 'B', text: q.option_b},
+                            {key: 'C', text: q.option_c},
+                            {key: 'D', text: q.option_d}
+                        ];
+                        const optionsHtml = options.map(opt => {
+                            const isCorrect = opt.key === q.answer;
+                            return `<div class="view-option ${isCorrect ? 'is-correct' : ''}">
+                                <strong>${opt.key}.</strong> ${opt.text} ${isCorrect ? '✓ 正确答案' : ''}
+                            </div>`;
+                        }).join('');
+
+                        return `
+                            <div class="view-question-card">
+                                <div class="q-text">
+                                    <span class="q-number">${idx + 1}</span>${q.question_text}
+                                </div>
+                                ${optionsHtml}
+                                <div class="view-question-meta">
+                                    <span>${difficultyLabels[q.difficulty] || '未知'}</span>
+                                    <span>知识点：${q.knowledge || '未标注'}</span>
+                                    <span>分值：${q.score}分</span>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    contentEl.innerHTML = '<div class="error-msg">加载失败</div>';
+                }
+            } catch (err) {
+                contentEl.innerHTML = '<div class="error-msg">加载失败</div>';
+            }
+        }
 
         async function loadExamRecords() {
             const listEl = document.getElementById('examListContent');
@@ -737,6 +1398,228 @@
                 }
             } catch (err) {
                 listEl.innerHTML = '<div class="error-msg">加载失败</div>';
+            }
+        }
+
+        function closeDetailAndReturn() {
+            closeModal('questionDetail');
+            if (detailReturnTo === 'exam') {
+                // 考试弹窗本来就没关，直接可见
+            } else if (detailReturnTo === 'questionList') {
+                showModal('questionList');
+            } else if (detailReturnTo === 'ai') {
+                showModal('ai');
+            }
+            detailReturnTo = null;
+        }
+
+        function toggleAiQuestion(id) {
+            const idx = window._aiSelectedQuestions.indexOf(id);
+            if (idx === -1) {
+                window._aiSelectedQuestions.push(id);
+            } else {
+                window._aiSelectedQuestions.splice(idx, 1);
+            }
+            const countEl = document.getElementById('aiSelectedCount');
+            if (countEl) countEl.textContent = window._aiSelectedQuestions.length;
+        }
+
+        async function viewAiQuestion(id) {
+            const q = window._aiGeneratedQuestions.find(item => item.id === id);
+            if (!q) { alert('题目不存在'); return; }
+
+            document.getElementById('editQuestionId').value = q.id;
+            document.getElementById('editText').value = q.question_text;
+            document.getElementById('editA').value = q.option_a;
+            document.getElementById('editB').value = q.option_b;
+            document.getElementById('editC').value = q.option_c;
+            document.getElementById('editD').value = q.option_d;
+            document.getElementById('editAnswer').value = q.answer;
+            document.getElementById('editKnowledge').value = q.knowledge || '';
+            document.getElementById('editDifficulty').value = q.difficulty;
+            document.getElementById('editScore').value = q.score;
+
+            const options = {A: q.option_a, B: q.option_b, C: q.option_c, D: q.option_d};
+            document.getElementById('editOptionsPreview').innerHTML = ['A','B','C','D'].map(key => {
+                const isCorrect = key === q.answer;
+                return `<div class="option-row ${isCorrect ? 'correct' : ''}">
+                    <strong>${key}.</strong> ${options[key]} ${isCorrect ? '✓ 正确答案' : ''}
+                </div>`;
+            }).join('');
+
+            document.getElementById('detailTitle').textContent = `题目 #${q.id} 详情`;
+            detailReturnTo = 'ai';
+            showModal('questionDetail');
+        }
+
+        async function createExamFromAi() {
+            if (!window._aiSelectedQuestions || window._aiSelectedQuestions.length === 0) {
+                alert('请至少选择一道题目');
+                return;
+            }
+
+            const aiKnowledge = document.getElementById('aiKnowledge').value;
+            const defaultName = aiKnowledge ? `${aiKnowledge}考试` : 'AI生成考试';
+            const examName = prompt('请输入考试名称：', defaultName);
+            if (!examName || !examName.trim()) return;
+
+            const durationStr = prompt('请输入考试时长（分钟）：', '60');
+            if (!durationStr) return;
+            const duration = parseInt(durationStr);
+            if (isNaN(duration) || duration < 1) {
+                alert('请输入有效的时长');
+                return;
+            }
+
+            try {
+                const result = await API.createExam(examName.trim(), duration, window._aiSelectedQuestions);
+                if (result.code === 200) {
+                    alert(`考试"${examName.trim()}"创建成功！\n共 ${window._aiSelectedQuestions.length} 题，时长 ${duration} 分钟`);
+                    closeModal('ai');
+                    loadQuestionStats();
+                } else {
+                    alert(result.message || '创建失败');
+                }
+            } catch (err) {
+                alert('创建失败');
+            }
+        }
+
+        async function loadQuestionList() {
+            const listEl = document.getElementById('questionListContent');
+            listEl.innerHTML = '<div class="loading">加载中...</div>';
+            try {
+                const result = await API.getQuestions(1, 200);
+                if (result.code === 200) {
+                    const questions = result.data.questions;
+                    if (questions.length === 0) {
+                        listEl.innerHTML = '<div class="empty-state">暂无题目，请先添加</div>';
+                        return;
+                    }
+                    const difficultyLabels = {1: '简单', 2: '中等', 3: '困难'};
+                    listEl.innerHTML = questions.map(q => `
+                        <div class="question-item" style="justify-content: space-between;">
+                            <div class="info" style="flex:1; min-width:0;">
+                                <div class="text" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                    ${q.question_text}
+                                </div>
+                                <div class="meta">
+                                    ${q.knowledge || '未分类'} |
+                                    <span class="difficulty-badge difficulty-${q.difficulty}">${difficultyLabels[q.difficulty] || '未知'}</span>
+                                    | ${q.score}分
+                                    ${q.is_ai_generated ? '| 🤖 AI生成' : ''}
+                                </div>
+                            </div>
+                            <div class="question-actions">
+                                <button class="btn-sm btn-view" onclick="viewQuestion(${q.id})">查看/编辑</button>
+                                <button class="btn-sm btn-del" onclick="deleteQuestionFromList(${q.id})">删除</button>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (err) {
+                listEl.innerHTML = '<div class="error-msg">加载失败</div>';
+            }
+        }
+
+        async function viewQuestion(id) {
+            try {
+                const result = await API.getQuestions(1, 200);
+                if (result.code !== 200) return;
+                const q = result.data.questions.find(item => item.id === id);
+                if (!q) {
+                    alert('题目不存在');
+                    return;
+                }
+
+                document.getElementById('editQuestionId').value = q.id;
+                document.getElementById('editText').value = q.question_text;
+                document.getElementById('editA').value = q.option_a;
+                document.getElementById('editB').value = q.option_b;
+                document.getElementById('editC').value = q.option_c;
+                document.getElementById('editD').value = q.option_d;
+                document.getElementById('editAnswer').value = q.answer;
+                document.getElementById('editKnowledge').value = q.knowledge || '';
+                document.getElementById('editDifficulty').value = q.difficulty;
+                document.getElementById('editScore').value = q.score;
+
+                // 更新选项预览（高亮正确答案）
+                const options = {A: q.option_a, B: q.option_b, C: q.option_c, D: q.option_d};
+                const previewHtml = ['A','B','C','D'].map(key => {
+                    const isCorrect = key === q.answer;
+                    return `<div class="option-row ${isCorrect ? 'correct' : ''}">
+                        <strong>${key}.</strong> ${options[key]} ${isCorrect ? '✓ 正确答案' : ''}
+                    </div>`;
+                }).join('');
+                document.getElementById('editOptionsPreview').innerHTML = previewHtml;
+
+                document.getElementById('detailTitle').textContent = `题目 #${q.id} 详情`;
+                detailReturnTo = 'questionList';
+                closeModal('questionList');
+                showModal('questionDetail');
+            } catch (err) {
+                alert('加载题目详情失败');
+            }
+        }
+
+        document.getElementById('questionEditForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const id = document.getElementById('editQuestionId').value;
+            const data = {
+                question_text: document.getElementById('editText').value,
+                option_a: document.getElementById('editA').value,
+                option_b: document.getElementById('editB').value,
+                option_c: document.getElementById('editC').value,
+                option_d: document.getElementById('editD').value,
+                answer: document.getElementById('editAnswer').value,
+                knowledge: document.getElementById('editKnowledge').value,
+                difficulty: parseInt(document.getElementById('editDifficulty').value),
+                score: parseInt(document.getElementById('editScore').value)
+            };
+
+            try {
+                const result = await API.updateQuestion(id, data);
+                if (result.code === 200) {
+                    alert('保存成功');
+                    closeModal('questionDetail');
+                    loadQuestionStats();
+                    // 返回到来源弹窗
+                    if (detailReturnTo === 'exam') {
+                        loadQuestionsForSelect();
+                        showModal('exam');
+                    } else if (detailReturnTo === 'questionList') {
+                        showModal('questionList');
+                    } else if (detailReturnTo === 'ai') {
+                        // 更新本地缓存的题目数据
+                        if (window._aiGeneratedQuestions) {
+                            const idx = window._aiGeneratedQuestions.findIndex(q => q.id == id);
+                            if (idx !== -1) {
+                                Object.assign(window._aiGeneratedQuestions[idx], data, {id: parseInt(id)});
+                            }
+                        }
+                        showModal('ai');
+                    }
+                    detailReturnTo = null;
+                } else {
+                    alert(result.message || '保存失败');
+                }
+            } catch (err) {
+                alert('保存失败');
+            }
+        });
+
+        async function deleteQuestionFromList(id) {
+            if (!confirm('确定删除这道题目吗？此操作不可撤销。')) return;
+            try {
+                const result = await API.deleteQuestion(id);
+                if (result.code === 200) {
+                    loadQuestionList();
+                    loadQuestionStats();
+                } else {
+                    alert(result.message || '删除失败');
+                }
+            } catch (err) {
+                alert('删除失败');
             }
         }
 

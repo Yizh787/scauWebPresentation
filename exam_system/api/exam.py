@@ -8,6 +8,27 @@ from datetime import datetime
 import json
 
 
+@bp.route('/students', methods=['GET'])
+def get_students():
+    """获取所有学生列表（管理员）"""
+    students = User.query.filter_by(role=0).order_by(User.create_time.desc()).all()
+
+    result = []
+    for s in students:
+        exam_count = ExamRecord.query.filter_by(user_id=s.id).filter(ExamRecord.end_time.isnot(None)).count()
+        result.append({
+            'id': s.id,
+            'username': s.username,
+            'create_time': s.create_time.strftime('%Y-%m-%d %H:%M:%S') if s.create_time else None,
+            'exam_count': exam_count
+        })
+
+    return jsonify({
+        'code': 200,
+        'data': result
+    })
+
+
 @bp.route('/exams', methods=['GET'])
 def get_exams():
     """获取考试列表（可选 user_id 排除已完成）"""
@@ -264,6 +285,63 @@ def get_all_exam_records():
     })
 
 
+@bp.route('/exams/manage', methods=['GET'])
+def get_exams_manage():
+    """获取所有考试及参与情况（管理员）"""
+    exams = Exam.query.order_by(Exam.create_time.desc()).all()
+
+    result = []
+    for exam in exams:
+        question_count = ExamQuestion.query.filter_by(exam_id=exam.id).count()
+        records = ExamRecord.query.filter_by(exam_id=exam.id).all()
+        completed = [r for r in records if r.end_time is not None]
+        in_progress = [r for r in records if r.end_time is None]
+
+        participants = []
+        for r in completed:
+            user = User.query.get(r.user_id)
+            participants.append({
+                'username': user.username if user else '未知用户',
+                'score': r.score,
+                'total_score': r.total_score,
+                'end_time': r.end_time.strftime('%Y-%m-%d %H:%M:%S') if r.end_time else None
+            })
+
+        result.append({
+            'exam': exam.to_dict(),
+            'question_count': question_count,
+            'completed_count': len(completed),
+            'in_progress_count': len(in_progress),
+            'participants': participants
+        })
+
+    return jsonify({
+        'code': 200,
+        'data': result
+    })
+
+
+@bp.route('/exam/<int:exam_id>/delete', methods=['DELETE'])
+def delete_exam(exam_id):
+    """删除考试及其关联数据（管理员）"""
+    exam = Exam.query.get(exam_id)
+    if not exam:
+        return jsonify({'code': 404, 'message': '考试不存在'}), 404
+
+    # 删除关联的考试题目
+    ExamQuestion.query.filter_by(exam_id=exam_id).delete()
+    # 删除关联的考试记录
+    ExamRecord.query.filter_by(exam_id=exam_id).delete()
+    # 删除考试
+    db.session.delete(exam)
+    db.session.commit()
+
+    return jsonify({
+        'code': 200,
+        'message': '考试已删除'
+    })
+
+
 @bp.route('/wrong_questions', methods=['GET'])
 def get_wrong_questions():
     """获取用户的错题列表"""
@@ -359,6 +437,49 @@ def create_question():
     return jsonify({
         'code': 200,
         'message': '题目创建成功',
+        'data': question.to_dict()
+    })
+
+
+@bp.route('/question/update/<int:question_id>', methods=['PUT'])
+def update_question(question_id):
+    """更新题目（管理员）"""
+    question = Question.query.get(question_id)
+    if not question:
+        return jsonify({'code': 404, 'message': '题目不存在'}), 404
+
+    data = request.get_json()
+    if not data:
+        return jsonify({'code': 400, 'message': '请求数据格式错误'}), 400
+
+    question_text = data.get('question_text', '').strip()
+    option_a = data.get('option_a', '').strip()
+    option_b = data.get('option_b', '').strip()
+    option_c = data.get('option_c', '').strip()
+    option_d = data.get('option_d', '').strip()
+    answer = data.get('answer', '').strip().upper()
+
+    if not all([question_text, option_a, option_b, option_c, option_d, answer]):
+        return jsonify({'code': 400, 'message': '请填写完整题目信息'}), 400
+
+    if answer not in ['A', 'B', 'C', 'D']:
+        return jsonify({'code': 400, 'message': '正确答案必须是A/B/C/D'}), 400
+
+    question.question_text = question_text
+    question.option_a = option_a
+    question.option_b = option_b
+    question.option_c = option_c
+    question.option_d = option_d
+    question.answer = answer
+    question.knowledge = data.get('knowledge', '')
+    question.difficulty = int(data.get('difficulty', 1))
+    question.score = int(data.get('score', 2))
+
+    db.session.commit()
+
+    return jsonify({
+        'code': 200,
+        'message': '更新成功',
         'data': question.to_dict()
     })
 
