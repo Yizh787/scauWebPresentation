@@ -1,0 +1,10 @@
+# Claude Code
+.claude/
+.agents/
+
+# Skills
+skills-lock.json
+
+# Impeccable
+.impeccable/
+impeccable/

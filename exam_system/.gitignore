@@ -39,3 +39,26 @@ ai_config.json
 
 # Node.js依赖（如果有）
 node_modules/
+
+# ========== 新增：Claude 和 Skill 相关 ==========
+# Claude Code
+.claude/
+.claude.local/
+
+# AI Skills 目录
+.agent/
+.agents/
+.skills/
+
+# Claude 配置文件（可能包含敏感信息）
+CLAUDE.md
+CLAUDE.local.md
+
+# Impeccable 相关
+.impeccable.md
+
+# Claude 和 Skill 相关
+.claude/
+.agents/
+impeccable/
+skills-lock.json

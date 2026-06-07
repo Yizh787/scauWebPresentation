@@ -6,68 +6,95 @@
     <title>考试中 - 四川农业大学考试系统</title>
     <link rel="stylesheet" href="/static/css/student.css">
     <style>
+        /* Header — matches system green gradient vocabulary */
         .exam-header {
             position: sticky;
             top: 0;
-            background: white;
-            padding: 15px 20px;
+            background: linear-gradient(135deg, #1a5c1a 0%, #2d8a2d 100%);
+            color: white;
+            padding: 14px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.15);
             z-index: 100;
         }
 
         .exam-header .logo-area {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
 
         .exam-header .logo-area img {
-            width: 28px;
-            height: 28px;
+            width: 30px;
+            height: 30px;
             object-fit: contain;
+        }
+
+        .exam-header .logo-area h1 {
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
         }
 
         .exam-header .timer {
             font-size: 20px;
-            font-weight: 600;
-            color: #2d8a2d;
+            font-weight: 700;
+            color: white;
+            font-variant-numeric: tabular-nums;
+            transition: color 0.3s;
+            background: rgba(255,255,255,0.15);
+            padding: 4px 14px;
+            border-radius: 8px;
         }
 
         .exam-header .timer.warning {
-            color: #e74c3c;
+            color: #fff;
+            background: rgba(231, 76, 60, 0.85);
+            animation: timer-pulse 1s ease-in-out infinite;
         }
 
+        @keyframes timer-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Question card */
         .question-card {
             background: white;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 15px;
+            border-radius: 14px;
+            padding: 24px 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
         }
 
         .question-number {
             display: inline-block;
             background: linear-gradient(135deg, #1a5c1a 0%, #2d8a2d 100%);
             color: white;
-            padding: 4px 12px;
-            border-radius: 15px;
+            padding: 5px 14px;
+            border-radius: 12px;
             font-size: 12px;
-            margin-bottom: 15px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            letter-spacing: 0.02em;
         }
 
+        /* Stronger type hierarchy: 18px/600 question vs 14px/400 options */
         .question-text {
-            font-size: 16px;
+            font-size: 18px;
+            font-weight: 600;
             line-height: 1.6;
-            color: #333;
-            margin-bottom: 20px;
+            color: #222;
+            margin-bottom: 24px;
+            text-wrap: pretty;
         }
 
         .options {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
         }
 
         .option-item {
@@ -77,7 +104,7 @@
             background: #f8f9fa;
             border-radius: 10px;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: background 0.2s, border-color 0.2s, transform 0.15s;
             border: 2px solid transparent;
         }
 
@@ -88,6 +115,10 @@
         .option-item.selected {
             background: rgba(45, 138, 45, 0.1);
             border-color: #2d8a2d;
+        }
+
+        .option-item:active {
+            transform: scale(0.98);
         }
 
         .option-item .option-label {
@@ -101,6 +132,8 @@
             font-weight: 600;
             margin-right: 12px;
             border: 2px solid #ddd;
+            transition: background 0.2s, border-color 0.2s, color 0.2s;
+            flex-shrink: 0;
         }
 
         .option-item.selected .option-label {
@@ -112,19 +145,22 @@
         .option-item .option-text {
             flex: 1;
             font-size: 14px;
-            color: #333;
+            color: #444;
+            line-height: 1.5;
         }
 
+        /* Bottom navigation bar */
         .bottom-bar {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
             background: white;
-            padding: 15px 20px;
+            padding: 12px 20px;
             display: flex;
             gap: 10px;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 -2px 12px rgba(0,0,0,0.08);
+            z-index: 100;
         }
 
         .bottom-bar .btn {
@@ -135,6 +171,11 @@
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.2s;
+        }
+
+        .bottom-bar .btn:active {
+            transform: scale(0.97);
         }
 
         .btn-prev {
@@ -147,9 +188,17 @@
             color: white;
         }
 
+        .btn-next:hover {
+            box-shadow: 0 4px 12px rgba(45, 138, 45, 0.3);
+        }
+
         .btn-submit {
             background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
             color: white;
+        }
+
+        .btn-submit:hover {
+            box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
         }
 
         .progress-bar {
@@ -159,18 +208,202 @@
             top: 0;
             left: 0;
             right: 0;
+            z-index: 101;
+            overflow: hidden;
         }
 
         .progress-bar .fill {
             height: 100%;
-            background: linear-gradient(135deg, #1a5c1a 0%, #2d8a2d 100%);
-            transition: width 0.3s;
+            width: 100%;
+            background: linear-gradient(90deg, #1a5c1a, #2d8a2d, #3da33d);
+            transform-origin: left;
+            transform: scaleX(0);
+            transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        /* Submission modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.25s, visibility 0.25s;
+        }
+
+        .modal-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-overlay .modal-content {
+            background: white;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 380px;
+            transform: translateY(20px) scale(0.95);
+            transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+            overflow: hidden;
+        }
+
+        .modal-overlay.visible .modal-content {
+            transform: translateY(0) scale(1);
+        }
+
+        .modal-header {
+            padding: 24px 24px 0;
+            text-align: center;
+        }
+
+        .modal-header .modal-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+        }
+
+        .modal-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .modal-header p {
+            font-size: 13px;
+            color: #999;
+        }
+
+        .modal-stats {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            padding: 20px 24px;
+        }
+
+        .modal-stat {
+            text-align: center;
+        }
+
+        .modal-stat .number {
+            font-size: 28px;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .modal-stat .number.answered { color: #2d8a2d; }
+        .modal-stat .number.unanswered { color: #f39c12; }
+
+        .modal-stat .label {
+            font-size: 12px;
+            color: #999;
+            margin-top: 2px;
+        }
+
+        .modal-warning {
+            margin: 0 24px;
+            padding: 12px 16px;
+            background: #fff8e8;
+            border-radius: 10px;
+            font-size: 13px;
+            color: #b37010;
+            text-align: center;
+        }
+
+        .modal-warning.hidden { display: none; }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            padding: 20px 24px 24px;
+        }
+
+        .modal-actions .btn {
+            flex: 1;
+            padding: 13px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.2s;
+        }
+
+        .modal-actions .btn:active {
+            transform: scale(0.97);
+        }
+
+        .modal-actions .btn-cancel {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .modal-actions .btn-confirm {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+        }
+
+        .modal-actions .btn-confirm:hover {
+            box-shadow: 0 4px 16px rgba(39, 174, 96, 0.35);
+        }
+
+        /* Submitting state */
+        .submitting-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(255,255,255,0.92);
+            z-index: 300;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s;
+        }
+
+        .submitting-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .submitting-spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid #e8f8e8;
+            border-top-color: #2d8a2d;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .submitting-text {
+            font-size: 16px;
+            font-weight: 500;
+            color: #2d8a2d;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .timer.warning { animation: none; opacity: 0.8; }
+            .option-item:active { transform: none; }
+            .bottom-bar .btn:active { transform: none; }
+            .modal-overlay,
+            .modal-overlay .modal-content { transition: none; }
+            .submitting-overlay { transition: none; }
+            .submitting-spinner { animation: none; border-top-color: #2d8a2d; }
         }
     </style>
 </head>
 <body>
     <div class="progress-bar">
-        <div class="fill" id="progressFill" style="width: 0%"></div>
+        <div class="fill" id="progressFill"></div>
     </div>
 
     <div class="exam-header">
@@ -181,14 +414,52 @@
         <div class="timer" id="timer">60:00</div>
     </div>
 
-    <div class="main-content" style="padding-bottom: 100px;">
+    <div class="main-content" style="padding-top: 16px; padding-bottom: 100px;">
         <div id="questionContainer"></div>
     </div>
 
     <div class="bottom-bar">
         <button class="btn btn-prev" id="prevBtn" onclick="prevQuestion()">上一题</button>
         <button class="btn btn-next" id="nextBtn" onclick="nextQuestion()">下一题</button>
-        <button class="btn btn-submit" id="submitBtn" onclick="confirmSubmit()">交卷</button>
+        <button class="btn btn-submit" id="submitBtn" onclick="openSubmitModal()">交卷</button>
+    </div>
+
+    <!-- Submit confirmation modal -->
+    <div class="modal-overlay" id="submitModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-icon">📋</div>
+                <h3>确认交卷</h3>
+                <p id="modalExamName">-</p>
+            </div>
+            <div class="modal-stats">
+                <div class="modal-stat">
+                    <div class="number answered" id="answeredCount">0</div>
+                    <div class="label">已答</div>
+                </div>
+                <div class="modal-stat">
+                    <div class="number unanswered" id="unansweredCount">0</div>
+                    <div class="label">未答</div>
+                </div>
+                <div class="modal-stat">
+                    <div class="number" id="modalTimer" style="color: #333;">--:--</div>
+                    <div class="label">剩余时间</div>
+                </div>
+            </div>
+            <div class="modal-warning" id="unansweredWarning">
+                还有 <strong id="warningCount">0</strong> 题未作答，交卷后无法修改
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-cancel" onclick="closeSubmitModal()">继续答题</button>
+                <button class="btn btn-confirm" onclick="submitExam()">确认交卷</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Submitting state -->
+    <div class="submitting-overlay" id="submittingOverlay">
+        <div class="submitting-spinner"></div>
+        <div class="submitting-text">正在提交答卷...</div>
     </div>
 
     <script src="../../static/js/api.js"></script>
@@ -208,13 +479,54 @@
         let timerInterval = null;
         let remainingSeconds = 0;
 
+        // Autosave key
+        const AUTOSAVE_KEY = `exam_autosave_${recordId}`;
+
+        function saveToLocalStorage() {
+            try {
+                localStorage.setItem(AUTOSAVE_KEY, JSON.stringify({
+                    answers: answers,
+                    currentIndex: currentIndex,
+                    timestamp: Date.now()
+                }));
+            } catch (e) {
+                // localStorage full or unavailable — silent fail
+            }
+        }
+
+        function loadFromLocalStorage() {
+            try {
+                const saved = localStorage.getItem(AUTOSAVE_KEY);
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    if (data.answers) answers = data.answers;
+                    if (typeof data.currentIndex === 'number') currentIndex = data.currentIndex;
+                    return true;
+                }
+            } catch (e) {
+                // Corrupted data — ignore
+            }
+            return false;
+        }
+
+        function clearLocalStorage() {
+            try {
+                localStorage.removeItem(AUTOSAVE_KEY);
+            } catch (e) {}
+        }
+
         async function loadExam() {
             try {
                 const result = await API.getExamDetail(examId, recordId);
                 if (result.code === 200) {
                     examData = result.data;
                     document.getElementById('examTitle').textContent = examData.exam.exam_name;
+                    document.getElementById('modalExamName').textContent = examData.exam.exam_name;
                     remainingSeconds = examData.exam.duration_minutes * 60;
+
+                    // Restore from localStorage if available
+                    loadFromLocalStorage();
+
                     startTimer();
                     renderQuestion();
                 }
@@ -241,8 +553,11 @@
             const seconds = remainingSeconds % 60;
             const timerEl = document.getElementById('timer');
             timerEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
             if (remainingSeconds < 300) {
                 timerEl.classList.add('warning');
+            } else {
+                timerEl.classList.remove('warning');
             }
         }
 
@@ -250,7 +565,8 @@
             const questions = examData.questions;
             const question = questions[currentIndex];
 
-            document.getElementById('progressFill').style.width = `${((currentIndex + 1) / questions.length) * 100}%`;
+            document.getElementById('progressFill').style.transform =
+                `scaleX(${(currentIndex + 1) / questions.length})`;
 
             const container = document.getElementById('questionContainer');
             container.innerHTML = `
@@ -258,47 +574,44 @@
                     <div class="question-number">第 ${currentIndex + 1} 题 / 共 ${questions.length} 题</div>
                     <div class="question-text">${question.question_text}</div>
                     <div class="options">
-                        <div class="option-item ${answers[question.id] === 'A' ? 'selected' : ''}" onclick="selectOption('A')">
-                            <div class="option-label">A</div>
-                            <div class="option-text">${question.option_a}</div>
-                        </div>
-                        <div class="option-item ${answers[question.id] === 'B' ? 'selected' : ''}" onclick="selectOption('B')">
-                            <div class="option-label">B</div>
-                            <div class="option-text">${question.option_b}</div>
-                        </div>
-                        <div class="option-item ${answers[question.id] === 'C' ? 'selected' : ''}" onclick="selectOption('C')">
-                            <div class="option-label">C</div>
-                            <div class="option-text">${question.option_c}</div>
-                        </div>
-                        <div class="option-item ${answers[question.id] === 'D' ? 'selected' : ''}" onclick="selectOption('D')">
-                            <div class="option-label">D</div>
-                            <div class="option-text">${question.option_d}</div>
-                        </div>
+                        ${['A','B','C','D'].map(opt => `
+                            <div class="option-item ${answers[question.id] === opt ? 'selected' : ''}" onclick="selectOption('${opt}')">
+                                <div class="option-label">${opt}</div>
+                                <div class="option-text">${question['option_' + opt.toLowerCase()]}</div>
+                            </div>
+                        `).join('')}
                     </div>
                 </div>
             `;
 
-            document.getElementById('prevBtn').disabled = currentIndex === 0;
-            document.getElementById('prevBtn').style.opacity = currentIndex === 0 ? 0.5 : 1;
+            // Update nav buttons
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const submitBtn = document.getElementById('submitBtn');
+
+            prevBtn.disabled = currentIndex === 0;
+            prevBtn.style.opacity = currentIndex === 0 ? 0.5 : 1;
 
             if (currentIndex === questions.length - 1) {
-                document.getElementById('nextBtn').style.display = 'none';
-                document.getElementById('submitBtn').style.display = 'block';
+                nextBtn.style.display = 'none';
+                submitBtn.style.display = 'block';
             } else {
-                document.getElementById('nextBtn').style.display = 'block';
-                document.getElementById('submitBtn').style.display = 'none';
+                nextBtn.style.display = 'block';
+                submitBtn.style.display = 'none';
             }
         }
 
         function selectOption(option) {
             const question = examData.questions[currentIndex];
             answers[question.id] = option;
+            saveToLocalStorage();
             renderQuestion();
         }
 
         function prevQuestion() {
             if (currentIndex > 0) {
                 currentIndex--;
+                saveToLocalStorage();
                 renderQuestion();
             }
         }
@@ -306,18 +619,48 @@
         function nextQuestion() {
             if (currentIndex < examData.questions.length - 1) {
                 currentIndex++;
+                saveToLocalStorage();
                 renderQuestion();
             }
         }
 
-        function confirmSubmit() {
-            if (confirm('确定要交卷吗？')) {
-                submitExam();
+        // Submit modal
+        function openSubmitModal() {
+            const total = examData.questions.length;
+            const answered = Object.keys(answers).length;
+            const unanswered = total - answered;
+
+            document.getElementById('answeredCount').textContent = answered;
+            document.getElementById('unansweredCount').textContent = unanswered;
+
+            // Update timer in modal
+            const minutes = Math.floor(remainingSeconds / 60);
+            const seconds = remainingSeconds % 60;
+            document.getElementById('modalTimer').textContent =
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+            // Show/hide warning
+            const warning = document.getElementById('unansweredWarning');
+            if (unanswered > 0) {
+                warning.classList.remove('hidden');
+                document.getElementById('warningCount').textContent = unanswered;
+            } else {
+                warning.classList.add('hidden');
             }
+
+            document.getElementById('submitModal').classList.add('visible');
+        }
+
+        function closeSubmitModal() {
+            document.getElementById('submitModal').classList.remove('visible');
         }
 
         async function submitExam() {
+            closeSubmitModal();
             clearInterval(timerInterval);
+
+            // Show submitting overlay
+            document.getElementById('submittingOverlay').classList.add('visible');
 
             const answerList = Object.keys(answers).map(qid => ({
                 question_id: parseInt(qid),
@@ -327,14 +670,30 @@
             try {
                 const result = await API.submitExam(recordId, answerList);
                 if (result.code === 200) {
-                    window.location.href = `exam_result.html?record_id=${recordId}&score=${result.data.score}&total=${result.data.total_score}`;
+                    clearLocalStorage();
+                    // Brief pause for the "submitting" feeling
+                    setTimeout(() => {
+                        window.location.href = `exam_result.html?record_id=${recordId}&score=${result.data.score}&total=${result.data.total_score}`;
+                    }, 600);
                 } else {
+                    document.getElementById('submittingOverlay').classList.remove('visible');
                     alert('提交失败: ' + result.message);
                 }
             } catch (err) {
+                document.getElementById('submittingOverlay').classList.remove('visible');
                 alert('提交失败，请稍后重试');
             }
         }
+
+        // Close modal on Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeSubmitModal();
+        });
+
+        // Close modal on backdrop click
+        document.getElementById('submitModal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closeSubmitModal();
+        });
 
         loadExam();
     </script>

@@ -5,19 +5,152 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>登录 - 四川农业大学考试系统</title>
     <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        /* Login success animation */
+        .card.success-state {
+            animation: card-success 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        @keyframes card-success {
+            0% { transform: scale(1); opacity: 1; }
+            30% { transform: scale(1.02); }
+            100% { transform: scale(0.95); opacity: 0; filter: blur(4px); }
+        }
+
+        /* Logo pulse on success */
+        .logo.success .logo-pulse {
+            animation: logo-pulse 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        @keyframes logo-pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+
+        /* Success checkmark overlay */
+        .success-overlay {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .success-overlay.visible {
+            opacity: 1;
+        }
+
+        .success-checkmark {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1a5c1a, #2d8a2d);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: scale(0);
+            animation: checkmark-pop 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.15s forwards;
+        }
+
+        @keyframes checkmark-pop {
+            0% { transform: scale(0) rotate(-45deg); }
+            60% { transform: scale(1.1) rotate(0deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        .success-checkmark svg {
+            width: 36px;
+            height: 36px;
+            stroke: white;
+            stroke-width: 3;
+            fill: none;
+            stroke-dasharray: 50;
+            stroke-dashoffset: 50;
+            animation: checkmark-draw 0.4s ease-out 0.5s forwards;
+        }
+
+        @keyframes checkmark-draw {
+            to { stroke-dashoffset: 0; }
+        }
+
+        /* Button loading state */
+        .btn.loading {
+            position: relative;
+            color: transparent;
+            pointer-events: none;
+        }
+
+        .btn.loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 2.5px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: btn-spin 0.7s linear infinite;
+        }
+
+        @keyframes btn-spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Input focus micro-interaction */
+        .form-group input {
+            transition: border-color 0.3s, box-shadow 0.3s, transform 0.2s;
+        }
+
+        .form-group input:focus {
+            transform: scale(1.01);
+        }
+
+        /* Shake on error */
+        .card.shake {
+            animation: card-shake 0.4s ease-out;
+        }
+
+        @keyframes card-shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-8px); }
+            40% { transform: translateX(8px); }
+            60% { transform: translateX(-4px); }
+            80% { transform: translateX(4px); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .card.success-state,
+            .logo.success .logo-pulse,
+            .success-checkmark,
+            .success-checkmark svg,
+            .card.shake {
+                animation: none;
+            }
+            .card.success-state {
+                opacity: 0;
+                transition: opacity 0.3s;
+            }
+            .success-overlay { transition: none; }
+            .form-group input:focus { transform: none; }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <div class="card">
-            <div class="logo">
-                <img src="../static/images/logo.png" alt="四川农业大学校徽">
+        <div class="card" id="loginCard">
+            <div class="logo" id="loginLogo">
+                <img src="../static/images/logo.png" alt="四川农业大学校徽" class="logo-pulse">
                 <h1>在线考试系统</h1>
                 <div class="school-name">四川农业大学</div>
-                <p>登录您的账户</p>
+                <p id="loginSubtitle">登录您的账户</p>
             </div>
 
-            <div class="error-msg"></div>
-            <div class="success-msg"></div>
+            <div class="error-msg" id="errorMsg"></div>
+            <div class="success-msg" id="successMsg"></div>
 
             <form id="loginForm">
                 <div class="form-group">
@@ -39,12 +172,30 @@
         </div>
     </div>
 
+    <!-- Success overlay -->
+    <div class="success-overlay" id="successOverlay">
+        <div class="success-checkmark">
+            <svg viewBox="0 0 24 24">
+                <polyline points="6 12 10 16 18 8"></polyline>
+            </svg>
+        </div>
+    </div>
+
     <div class="footer-text">
         © 2024 四川农业大学 教务处
     </div>
 
     <script src="../static/js/api.js"></script>
     <script>
+        // Time-aware subtitle
+        const hour = new Date().getHours();
+        const subtitle = document.getElementById('loginSubtitle');
+        if (hour < 6) subtitle.textContent = '夜深了，注意休息';
+        else if (hour < 12) subtitle.textContent = '新的一天，从考试开始';
+        else if (hour < 14) subtitle.textContent = '午间登录，继续学习';
+        else if (hour < 18) subtitle.textContent = '下午好，准备好考试了吗';
+        else subtitle.textContent = '晚间学习，效率更高';
+
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             hideMsg();
@@ -52,21 +203,31 @@
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
             const submitBtn = document.getElementById('submitBtn');
+            const card = document.getElementById('loginCard');
 
             if (!username || !password) {
                 showError('请输入用户名和密码');
+                card.classList.add('shake');
+                setTimeout(() => card.classList.remove('shake'), 400);
                 return;
             }
 
+            submitBtn.classList.add('loading');
             submitBtn.disabled = true;
-            submitBtn.textContent = '登录中...';
 
             try {
                 const result = await API.login(username, password);
 
                 if (result.code === 200) {
-                    showSuccess('登录成功！');
                     Auth.saveUser(result.data);
+
+                    // Delight: success checkmark + card fade
+                    const overlay = document.getElementById('successOverlay');
+                    overlay.classList.add('visible');
+
+                    setTimeout(() => {
+                        card.classList.add('success-state');
+                    }, 400);
 
                     setTimeout(() => {
                         if (result.data.role === 1) {
@@ -74,16 +235,19 @@
                         } else {
                             window.location.href = '/student/student_dashboard.html';
                         }
-                    }, 500);
+                    }, 1000);
                 } else {
                     showError(result.message || '登录失败');
+                    card.classList.add('shake');
+                    setTimeout(() => card.classList.remove('shake'), 400);
                 }
             } catch (err) {
                 showError('网络错误，请检查后端服务是否启动');
-                console.error(err);
+                card.classList.add('shake');
+                setTimeout(() => card.classList.remove('shake'), 400);
             } finally {
+                submitBtn.classList.remove('loading');
                 submitBtn.disabled = false;
-                submitBtn.textContent = '登 录';
             }
         });
     </script>
