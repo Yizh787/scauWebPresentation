@@ -583,6 +583,87 @@ body {
     color: #999;
 }
 
+.btn-preview {
+    padding: 4px 10px;
+    border: 1px solid #e0e0e0;
+    background: white;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.btn-preview:hover {
+    border-color: #2d8a2d;
+    color: #2d8a2d;
+    background: #e8f5e9;
+}
+
+.select-item-wrap {
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.select-item-wrap:last-child {
+    border-bottom: none;
+}
+
+.preview-panel {
+    display: none;
+    padding: 12px;
+    margin: 0 8px 8px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 3px solid #2d8a2d;
+}
+
+.preview-panel.show {
+    display: block;
+}
+
+.preview-question {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 12px;
+    line-height: 1.6;
+}
+
+.preview-options {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.preview-option {
+    padding: 8px 10px;
+    background: white;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #444;
+}
+
+.preview-option.correct {
+    background: #e8f5e9;
+    border-left: 3px solid #2d8a2d;
+    font-weight: 500;
+}
+
+.correct-mark {
+    color: #2d8a2d;
+    font-size: 12px;
+    margin-left: 8px;
+}
+
+.preview-meta {
+    display: flex;
+    gap: 16px;
+    font-size: 12px;
+    color: #999;
+}
+
 .selector-info {
     margin-top: 8px;
     font-size: 13px;
@@ -850,6 +931,54 @@ body {
 }
 
 /* AI Result */
+.ai-progress-wrap {
+    margin-bottom: 20px;
+}
+
+.ai-progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 8px;
+}
+
+.ai-progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.ai-progress-bar .fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #1a5c1a, #2d8a2d);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.ai-progress-steps {
+    margin-top: 12px;
+    font-size: 12px;
+    color: #888;
+}
+
+.ai-progress-steps span {
+    display: block;
+    padding: 2px 0;
+}
+
+.ai-progress-steps span.done {
+    color: #2d8a2d;
+}
+
+.ai-progress-steps span.active {
+    color: #1a5c1a;
+    font-weight: 600;
+}
+
 .ai-success {
     padding: 12px;
     background: #e8f5e9;

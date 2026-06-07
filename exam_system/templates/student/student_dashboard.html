@@ -392,7 +392,7 @@
         </div>
 
         <!-- Pending exams -->
-        <div class="section-card">
+        <div class="section-card" id="examSection">
             <div class="section-header">
                 <h3><span class="icon">📝</span> 待考试卷</h3>
                 <span class="count-badge" id="examCount" style="display:none;">0</span>
@@ -405,10 +405,10 @@
             </div>
         </div>
 
-        <!-- Recent records -->
-        <div class="section-card">
+        <!-- Records -->
+        <div class="section-card" id="recordSection">
             <div class="section-header">
-                <h3><span class="icon">📊</span> 最近成绩</h3>
+                <h3><span class="icon">📊</span> 考试记录</h3>
                 <span class="count-badge" id="recordCount" style="display:none;">0</span>
             </div>
             <div id="recordList">
@@ -575,9 +575,8 @@
                 if (result.code === 200 && result.data.length > 0) {
                     document.getElementById('recordCount').textContent = result.data.length;
                     document.getElementById('recordCount').style.display = 'inline';
-                    // Show last 5
-                    const recent = result.data.slice(0, 5);
-                    recordList.innerHTML = recent.map(record => {
+                    // 显示全部记录
+                    recordList.innerHTML = result.data.map(record => {
                         const scoreRate = record.record.score / record.record.total_score;
                         const isPass = scoreRate >= 0.6;
                         return `
@@ -659,20 +658,26 @@
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
             event.currentTarget.classList.add('active');
 
-            const sectionCards = document.querySelectorAll('.section-card');
+            const examSection = document.getElementById('examSection');
+            const recordSection = document.getElementById('recordSection');
+            const sectionTitle = recordSection.querySelector('h3');
+            const countBadge = document.getElementById('recordCount');
 
             if (tab === 'exam') {
-                sectionCards[0].style.display = 'block';
-                sectionCards[1].style.display = 'block';
+                examSection.style.display = 'block';
+                recordSection.style.display = 'none';
                 loadExams();
-                loadRecords();
             } else if (tab === 'record') {
-                sectionCards[0].style.display = 'none';
-                sectionCards[1].style.display = 'block';
+                examSection.style.display = 'none';
+                recordSection.style.display = 'block';
+                sectionTitle.innerHTML = '<span class="icon">📊</span> 考试记录';
+                countBadge.style.display = 'none';
                 loadRecords();
             } else if (tab === 'wrong') {
-                sectionCards[0].style.display = 'none';
-                sectionCards[1].style.display = 'block';
+                examSection.style.display = 'none';
+                recordSection.style.display = 'block';
+                sectionTitle.innerHTML = '<span class="icon">📝</span> 错题本';
+                countBadge.style.display = 'none';
                 loadWrongQuestions();
             }
         }
@@ -680,8 +685,10 @@
         // Init
         loadStats();
         loadExams();
-        loadRecords();
         checkActiveExam();
+
+        // 默认隐藏记录区域
+        document.getElementById('recordSection').style.display = 'none';
     </script>
 </body>
 </html>

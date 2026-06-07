@@ -257,13 +257,14 @@ def submit_exam():
     exam = Exam.query.get(record.exam_id)
     exam_questions = ExamQuestion.query.filter_by(exam_id=record.exam_id).order_by(ExamQuestion.order_num).all()
 
-    # 加载乱序映射，构建反向映射（shuffled_label -> original_label）
-    inverse_map = {}
+    # 加载乱序映射
+    # opt_map 的含义: {shuffled_label: original_label}
+    # 例如 {'A': 'B', 'B': 'D', 'C': 'A', 'D': 'C'}
+    # 表示：显示的A位置放的是原始B的内容
+    opt_maps = {}
     if record.shuffle_data:
         shuffle_info = json.loads(record.shuffle_data)
         opt_maps = shuffle_info.get('option_maps', {})
-        for qid_str, omap in opt_maps.items():
-            inverse_map[qid_str] = {v: k for k, v in omap.items()}
 
     score = 0
     wrong_list = []
@@ -280,9 +281,11 @@ def submit_exam():
                 break
 
         # 将学生的乱序答案还原为原始答案
+        # 学生选的是显示的标签（如A），需要找到显示的A对应的是哪个原始选项
         original_answer = user_answer
-        if user_answer and str(question.id) in inverse_map:
-            original_answer = inverse_map[str(question.id)].get(user_answer.upper(), user_answer)
+        if user_answer and str(question.id) in opt_maps:
+            # opt_map 直接就是 {shuffled_label: original_label}
+            original_answer = opt_maps[str(question.id)].get(user_answer.upper(), user_answer)
 
         if original_answer and original_answer.upper() == question.answer.upper():
             score += question.score

@@ -732,14 +732,18 @@
                 return;
             }
 
-            document.getElementById('examManageContent').innerHTML = exams.map(item => {
+            // 缓存考试数据供按钮使用
+            window._examsData = exams;
+
+            document.getElementById('examManageContent').innerHTML = exams.map((item, index) => {
                 const e = item.exam;
                 const total = item.completed_count + item.in_progress_count;
+                const safeName = e.exam_name.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
                 return `
                     <div class="exam-card">
                         <div class="exam-card-header">
                             <div>
-                                <h4>${e.exam_name}</h4>
+                                <h4>${safeName}</h4>
                                 <div class="exam-meta">
                                     ${item.question_count} 题 · ${e.total_score} 分 · ${e.duration_minutes} 分钟
                                     ${e.shuffle_enabled ? ' · 🔀 乱序' : ''}
@@ -766,12 +770,26 @@
                             </div>
                         ` : '<div class="exam-empty">暂无人参加</div>'}
                         <div class="exam-actions">
-                            <button class="btn btn-sm btn-ghost" onclick="viewExamQuestions(${e.id}, '${e.exam_name.replace(/'/g, "\\'")}')">查看题目</button>
-                            <button class="btn btn-sm btn-danger" onclick="deleteExam(${e.id}, '${e.exam_name.replace(/'/g, "\\'")}')">删除</button>
+                            <button class="btn btn-sm btn-ghost" onclick="handleViewExamQuestions(${index})">查看题目</button>
+                            <button class="btn btn-sm btn-danger" onclick="handleDeleteExam(${index})">删除</button>
                         </div>
                     </div>
                 `;
             }).join('');
+        }
+
+        function handleViewExamQuestions(index) {
+            const item = window._examsData[index];
+            if (item && item.exam) {
+                viewExamQuestions(item.exam.id, item.exam.exam_name);
+            }
+        }
+
+        function handleDeleteExam(index) {
+            const item = window._examsData[index];
+            if (item && item.exam) {
+                deleteExam(item.exam.id, item.exam.exam_name);
+            }
         }
 
         function showCreateExam() {
@@ -790,17 +808,44 @@
                 const result = await API.getQuestions(1, 1000);
                 if (result.code === 200) {
                     selectedQuestions = [];
-                    document.getElementById('questionSelectList').innerHTML = result.data.questions.map(q => `
-                        <label class="select-item">
-                            <input type="checkbox" value="${q.id}" onchange="toggleQuestion(${q.id}, ${q.score})">
-                            <span class="select-text">${truncate(q.question_text, 50)}</span>
-                            <span class="select-meta">${q.knowledge || '未分类'} · ${q.score}分</span>
-                        </label>
+                    allQuestions = result.data.questions;
+                    document.getElementById('questionSelectList').innerHTML = allQuestions.map(q => `
+                        <div class="select-item-wrap">
+                            <label class="select-item">
+                                <input type="checkbox" value="${q.id}" onchange="toggleQuestion(${q.id}, ${q.score})">
+                                <span class="select-text">${truncate(q.question_text, 50)}</span>
+                                <span class="select-meta">${q.knowledge || '未分类'} · ${q.score}分</span>
+                                <button type="button" class="btn-preview" onclick="event.preventDefault(); togglePreview(${q.id})">预览</button>
+                            </label>
+                            <div class="preview-panel" id="preview-${q.id}">
+                                <div class="preview-question">${q.question_text}</div>
+                                <div class="preview-options">
+                                    ${['A','B','C','D'].map(opt => `
+                                        <div class="preview-option ${opt === q.answer ? 'correct' : ''}">
+                                            <strong>${opt}.</strong> ${q['option_' + opt.toLowerCase()]}
+                                            ${opt === q.answer ? '<span class="correct-mark">✓ 正确答案</span>' : ''}
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                <div class="preview-meta">
+                                    <span>难度: ${['','简单','中等','困难'][q.difficulty]}</span>
+                                    <span>知识点: ${q.knowledge || '未分类'}</span>
+                                </div>
+                            </div>
+                        </div>
                     `).join('');
                 }
             } catch {
                 document.getElementById('questionSelectList').innerHTML = '<div class="error-msg">加载失败</div>';
             }
+        }
+
+        function togglePreview(id) {
+            const panel = document.getElementById(`preview-${id}`);
+            const isOpen = panel.classList.contains('show');
+            // 关闭其他预览
+            document.querySelectorAll('.preview-panel.show').forEach(p => p.classList.remove('show'));
+            if (!isOpen) panel.classList.add('show');
         }
 
         function toggleQuestion(id, score) {
@@ -847,7 +892,9 @@
 
             try {
                 const result = await API.getExamDetail(examId);
-                if (result.code === 200) {
+                console.log('Exam detail result:', result);
+
+                if (result.code === 200 && result.data && result.data.questions) {
                     const questions = result.data.questions;
                     if (questions.length === 0) {
                         document.getElementById('examQuestionsContent').innerHTML = '<div class="empty-state">暂无题目</div>';
@@ -858,26 +905,29 @@
                         <div class="question-card">
                             <div class="question-num">${i + 1}</div>
                             <div class="question-body">
-                                <div class="question-text">${q.question_text}</div>
+                                <div class="question-text">${q.question_text || ''}</div>
                                 <div class="question-options">
                                     ${['A','B','C','D'].map(key => `
                                         <div class="option ${key === q.answer ? 'correct' : ''}">
-                                            <strong>${key}.</strong> ${q['option_' + key.toLowerCase()]}
+                                            <strong>${key}.</strong> ${q['option_' + key.toLowerCase()] || ''}
                                             ${key === q.answer ? '<span class="correct-mark">✓</span>' : ''}
                                         </div>
                                     `).join('')}
                                 </div>
                                 <div class="question-meta">
-                                    <span class="badge ${['','easy','medium','hard'][q.difficulty]}">${['','简单','中等','困难'][q.difficulty]}</span>
+                                    <span class="badge ${['','easy','medium','hard'][q.difficulty] || ''}">${['','简单','中等','困难'][q.difficulty] || '未知'}</span>
                                     <span>${q.knowledge || '未分类'}</span>
-                                    <span>${q.score}分</span>
+                                    <span>${q.score || 0}分</span>
                                 </div>
                             </div>
                         </div>
                     `).join('');
+                } else {
+                    document.getElementById('examQuestionsContent').innerHTML = `<div class="error-msg">${result.message || '加载失败'}</div>`;
                 }
-            } catch {
-                document.getElementById('examQuestionsContent').innerHTML = '<div class="error-msg">加载失败</div>';
+            } catch (err) {
+                console.error('viewExamQuestions error:', err);
+                document.getElementById('examQuestionsContent').innerHTML = '<div class="error-msg">加载失败，请查看控制台</div>';
             }
         }
 
@@ -974,38 +1024,109 @@
             const resultCard = document.getElementById('aiResult');
             const content = document.getElementById('aiResultContent');
             resultCard.style.display = 'block';
-            content.innerHTML = '<div class="loading">正在生成...</div>';
+
+            const count = parseInt(document.getElementById('aiCount').value);
+            const steps = [
+                '正在连接 AI 服务...',
+                '正在分析知识点...',
+                `正在生成 ${count} 道题目...`,
+                '正在整理生成结果...'
+            ];
+
+            // 渲染进度条
+            content.innerHTML = `
+                <div class="ai-progress-wrap">
+                    <div class="ai-progress-label">
+                        <span id="aiProgressText">${steps[0]}</span>
+                        <span id="aiProgressPct">0%</span>
+                    </div>
+                    <div class="ai-progress-bar"><div class="fill" id="aiProgressFill"></div></div>
+                    <div class="ai-progress-steps" id="aiProgressSteps"></div>
+                </div>
+            `;
+
+            const fillEl = document.getElementById('aiProgressFill');
+            const pctEl = document.getElementById('aiProgressPct');
+            const textEl = document.getElementById('aiProgressText');
+            const stepsEl = document.getElementById('aiProgressSteps');
+
+            // 模拟进度
+            const stageTargets = [20, 45, 75, 92];
+            let currentStage = 0;
+            let progress = 0;
+
+            const timer = setInterval(() => {
+                if (currentStage >= stageTargets.length) return;
+                const target = stageTargets[currentStage];
+                if (progress < target) {
+                    progress += Math.random() * 3 + 1;
+                    if (progress > target) progress = target;
+                    fillEl.style.width = progress + '%';
+                    pctEl.textContent = Math.round(progress) + '%';
+                } else {
+                    // 进入下一阶段
+                    stepsEl.innerHTML += `<span class="done">✓ ${steps[currentStage]}</span>`;
+                    currentStage++;
+                    if (currentStage < steps.length) {
+                        textEl.textContent = steps[currentStage];
+                        stepsEl.innerHTML += `<span class="active">▸ ${steps[currentStage]}</span>`;
+                    }
+                }
+            }, 300);
+
+            // 立即显示第一步
+            stepsEl.innerHTML = `<span class="active">▸ ${steps[0]}</span>`;
 
             const data = {
                 knowledge: document.getElementById('aiKnowledge').value,
                 difficulty: parseInt(document.getElementById('aiDifficulty').value),
-                count: parseInt(document.getElementById('aiCount').value)
+                count: count
             };
 
             try {
                 const result = await API.aiGenerateQuestions(data.knowledge, data.difficulty, data.count);
+                clearInterval(timer);
+
                 if (result.code === 200) {
+                    fillEl.style.width = '100%';
+                    pctEl.textContent = '100%';
+                    textEl.textContent = '生成完成';
+                    stepsEl.innerHTML += `<span class="done">✓ ${steps[currentStage] || steps[steps.length - 1]}</span>`;
+
                     const questions = result.data;
-                    content.innerHTML = `
-                        <div class="ai-success">成功生成 ${questions.length} 道题目！已自动加入题库。</div>
-                        <div class="ai-list">
-                            ${questions.map(q => `
-                                <div class="ai-item">
-                                    <div class="ai-text">${truncate(q.question_text, 60)}</div>
-                                    <div class="ai-meta">${q.knowledge || '未分类'} · ${q.score}分</div>
+                    // 缓存生成的题目
+                    window._aiGeneratedQuestions = questions;
+
+                    setTimeout(() => {
+                        content.innerHTML = `
+                            <div class="ai-progress-wrap">
+                                <div class="ai-progress-label">
+                                    <span>生成完成</span>
+                                    <span>100%</span>
                                 </div>
-                            `).join('')}
-                        </div>
-                        <div class="ai-actions">
-                            <button class="btn btn-secondary" onclick="loadQuestions()">刷新题库</button>
-                            <button class="btn btn-primary" onclick="switchPanel('exams');showCreateExam()">创建考试</button>
-                        </div>
-                    `;
+                                <div class="ai-progress-bar"><div class="fill" style="width:100%"></div></div>
+                            </div>
+                            <div class="ai-success">成功生成 ${questions.length} 道题目！已自动加入题库。</div>
+                            <div class="ai-list">
+                                ${questions.map(q => `
+                                    <div class="ai-item">
+                                        <div class="ai-text">${truncate(q.question_text, 60)}</div>
+                                        <div class="ai-meta">${q.knowledge || '未分类'} · ${q.score}分</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <div class="ai-actions">
+                                <button class="btn btn-secondary" onclick="loadQuestions()">刷新题库</button>
+                                <button class="btn btn-primary" onclick="switchPanel('exams');showCreateExam()">创建考试</button>
+                            </div>
+                        `;
+                    }, 600);
                     showToast(`成功生成 ${questions.length} 道题目`);
                 } else {
                     content.innerHTML = `<div class="error-msg">${result.message}</div>`;
                 }
             } catch {
+                clearInterval(timer);
                 content.innerHTML = '<div class="error-msg">AI 生成失败，请检查配置</div>';
             }
         });
