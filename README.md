@@ -28,6 +28,12 @@
 - AI 智能讲解错题
 - 知识点分类整理
 
+#### ⚙️ AI 后端管理
+- 查看当前 AI 连接状态（服务商、模型、Base URL、API Key 预览）
+- 配置 AI 后端信息（Provider、模型名、Base URL、API Key）
+- 测试连接：验证配置是否可用
+- 保存配置：连接成功后自动写入 `ai_config.json`
+
 #### 🎯 考试界面
 - 倒计时提醒（最后5分钟警告）
 - 答案自动保存（防止意外丢失）
@@ -45,7 +51,7 @@
 
 ### 管理员功能
 
-管理后台采用**左侧标签导航 + 右侧内容区**布局，包含 5 大功能模块：
+管理后台采用**左侧标签导航 + 右侧内容区**布局，包含 6 大功能模块：
 
 #### 📊 数据概览
 - 统计卡片：题库总数、考试场次、学生人数、AI状态
@@ -81,6 +87,13 @@
 - **进度条动画**：实时显示生成进度
 - 生成结果展示：题目列表可预览
 - 一键创建考试：直接用 AI 生成的题目创建考试
+
+#### ⚙️ AI 后端管理
+- 当前连接状态展示：服务商、模型、Base URL、API Key 预览
+- 配置表单：Provider、模型名、Base URL、API Key
+- **测试连接**：验证配置是否可用，不保存
+- **保存配置**：先测试连接，通过后写入 `ai_config.json`；失败则提示不保存
+- 支持的 AI 服务商：DeepSeek、OpenAI、小米 Mimo 等兼容 OpenAI API 格式的服务
 
 ## 快速开始
 
@@ -225,23 +238,52 @@ scauWebPresentation/
 ### AI 功能
 | 方法 | 路径 | 说明 |
 |------|------|------|
-| GET | `/api/ai/config` | 获取 AI 配置状态 |
+| GET | `/api/ai/config` | 获取 AI 配置状态（含连接信息） |
+| POST | `/api/ai/config/save` | 保存 AI 配置（先测试连接再写入） |
+| POST | `/api/ai/config/test` | 测试 AI 连接（不保存） |
 | POST | `/api/ai/explain` | AI 错题讲解 |
 | POST | `/api/ai/generate/questions` | AI 智能出题 |
 | POST | `/api/ai/summary` | AI 考试总结 |
 
 ## AI 配置
 
-在 `exam_system/ai_config.json` 中配置 AI API：
+支持两种配置方式：
+
+### 方式一：网页界面配置（推荐）
+
+登录管理员或学生账号后，进入 **AI 后端管理** 页面，填写以下信息：
+
+| 字段 | 说明 | 示例 |
+|------|------|------|
+| Provider | 服务商名称 | `deepseek`、`openai`、`xiaomimimo` |
+| 模型名称 | 使用的模型 | `deepseek-chat`、`gpt-4o`、`mimo-v2.5-pro` |
+| Base URL | API 地址 | `https://api.deepseek.com/v1` |
+| API Key | 访问密钥 | `sk-xxxxxxxxxxxx` |
+
+点击 **测试连接** 验证配置，成功后点击 **保存配置** 写入 `ai_config.json`。
+
+### 方式二：手动编辑配置文件
+
+直接编辑 `exam_system/ai_config.json`：
 
 ```json
 {
   "provider": "deepseek",
   "api_key": "your-api-key-here",
-  "base_url": "https://api.deepseek.com",
-  "model": "deepseek-chat"
+  "base_url": "https://api.deepseek.com/v1",
+  "model": "deepseek-chat",
+  "temperature": 0.7
 }
 ```
+
+### 支持的 AI 服务
+
+任何兼容 OpenAI API 格式的服务均可使用，包括：
+- DeepSeek
+- OpenAI
+- 小米 Mimo
+- 阿里通义千问
+- 其他 OpenAI 兼容服务
 
 ## 设计规范
 
@@ -272,6 +314,16 @@ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
 - 标签：4px
 
 ## 更新日志
+
+### v2.1 (2026-06-09)
+
+**AI 后端管理功能**
+- 新增 AI 后端管理界面，学生端和管理员端均可使用
+- 支持配置 Provider、模型名、Base URL、API Key 四项信息
+- 保存前自动测试连接：连接成功则写入 `ai_config.json`，失败则提示不保存
+- 测试连接功能：仅验证配置可用性，不保存
+- 实时显示当前 AI 连接状态（服务商、模型、地址、Key 预览）
+- 新增 `POST /api/ai/config/save` 和 `POST /api/ai/config/test` 接口
 
 ### v2.0 (2026-06-07)
 

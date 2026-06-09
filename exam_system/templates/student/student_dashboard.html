@@ -352,6 +352,175 @@
                 animation: none;
             }
         }
+
+        /* Settings / AI Config */
+        .form-field {
+            margin-bottom: 14px;
+        }
+
+        .form-field label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #666;
+            margin-bottom: 6px;
+        }
+
+        .form-field input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-field input:focus {
+            border-color: #2d8a2d;
+            box-shadow: 0 0 0 3px rgba(45, 138, 45, 0.1);
+        }
+
+        .field-hint-student {
+            font-size: 12px;
+            color: #999;
+            margin-top: 4px;
+        }
+
+        .form-btn-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .test-btn {
+            flex: 1;
+            padding: 10px;
+            border: 1.5px solid #2d8a2d;
+            background: white;
+            color: #2d8a2d;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .test-btn:hover {
+            background: #e8f5e9;
+        }
+
+        .test-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .save-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: linear-gradient(135deg, #1a5c1a 0%, #2d8a2d 100%);
+            color: white;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .save-btn:hover {
+            box-shadow: 0 4px 12px rgba(45, 138, 45, 0.3);
+        }
+
+        .save-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .config-status-student {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .config-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .config-row .cfg-label {
+            font-size: 12px;
+            color: #999;
+            width: 70px;
+            flex-shrink: 0;
+        }
+
+        .config-row .cfg-value {
+            font-size: 13px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-badge.connected {
+            background: #e8f5e9;
+            color: #27ae60;
+        }
+
+        .status-badge.disconnected {
+            background: #fdecea;
+            color: #e74c3c;
+        }
+
+        .test-result-student {
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        .test-result-student.success {
+            background: #e8f5e9;
+            color: #27ae60;
+        }
+
+        .test-result-student.error {
+            background: #fdecea;
+            color: #e74c3c;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(60px);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            z-index: 2000;
+            transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+            color: white;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast-success { background: #27ae60; }
+        .toast-error { background: #e74c3c; }
     </style>
 </head>
 <body>
@@ -418,6 +587,42 @@
                 <div class="skeleton skeleton-line short"></div>
             </div>
         </div>
+
+        <!-- Settings: AI Config -->
+        <div class="section-card" id="settingsSection" style="display:none;">
+            <div class="section-header">
+                <h3><span class="icon">🤖</span> AI 后端管理</h3>
+            </div>
+
+            <div id="aiConfigStatusStudent" style="margin-bottom:16px;">
+                <div class="skeleton skeleton-line medium"></div>
+            </div>
+
+            <form id="aiConfigFormStudent">
+                <div class="form-field">
+                    <label>Provider（服务商）</label>
+                    <input type="text" id="stuCfgProvider" placeholder="如：deepseek、openai" required>
+                </div>
+                <div class="form-field">
+                    <label>模型名称</label>
+                    <input type="text" id="stuCfgModel" placeholder="如：deepseek-chat" required>
+                </div>
+                <div class="form-field">
+                    <label>Base URL</label>
+                    <input type="text" id="stuCfgBaseUrl" placeholder="如：https://api.deepseek.com/v1" required>
+                </div>
+                <div class="form-field">
+                    <label>API Key</label>
+                    <input type="password" id="stuCfgApiKey" placeholder="请输入 API Key" required>
+                    <div class="field-hint-student" id="stuCfgApiKeyHint"></div>
+                </div>
+                <div class="form-btn-row">
+                    <button type="button" class="test-btn" id="btnTestConnectionStudent">🔗 测试连接</button>
+                    <button type="submit" class="save-btn">💾 保存配置</button>
+                </div>
+            </form>
+            <div id="aiConfigResultStudent" style="margin-top:12px;"></div>
+        </div>
     </div>
 
     <div class="nav-bar">
@@ -432,6 +637,10 @@
         <div class="nav-item" onclick="showTab('wrong')">
             <span class="icon">📝</span>
             <span>错题</span>
+        </div>
+        <div class="nav-item" onclick="showTab('settings')">
+            <span class="icon">⚙️</span>
+            <span>设置</span>
         </div>
     </div>
 
@@ -660,27 +869,188 @@
 
             const examSection = document.getElementById('examSection');
             const recordSection = document.getElementById('recordSection');
+            const settingsSection = document.getElementById('settingsSection');
+            const statsStrip = document.getElementById('statsStrip');
+            const activeBanner = document.getElementById('activeExamBanner');
+            const greeting = document.querySelector('.greeting');
             const sectionTitle = recordSection.querySelector('h3');
             const countBadge = document.getElementById('recordCount');
 
+            // Hide all sections first
+            examSection.style.display = 'none';
+            recordSection.style.display = 'none';
+            settingsSection.style.display = 'none';
+
             if (tab === 'exam') {
+                statsStrip.style.display = '';
+                activeBanner.style.display = activeExamId ? 'flex' : 'none';
+                greeting.style.display = '';
                 examSection.style.display = 'block';
-                recordSection.style.display = 'none';
                 loadExams();
             } else if (tab === 'record') {
-                examSection.style.display = 'none';
+                statsStrip.style.display = 'none';
+                activeBanner.style.display = 'none';
+                greeting.style.display = 'none';
                 recordSection.style.display = 'block';
                 sectionTitle.innerHTML = '<span class="icon">📊</span> 考试记录';
                 countBadge.style.display = 'none';
                 loadRecords();
             } else if (tab === 'wrong') {
-                examSection.style.display = 'none';
+                statsStrip.style.display = 'none';
+                activeBanner.style.display = 'none';
+                greeting.style.display = 'none';
                 recordSection.style.display = 'block';
                 sectionTitle.innerHTML = '<span class="icon">📝</span> 错题本';
                 countBadge.style.display = 'none';
                 loadWrongQuestions();
+            } else if (tab === 'settings') {
+                statsStrip.style.display = 'none';
+                activeBanner.style.display = 'none';
+                greeting.style.display = 'none';
+                settingsSection.style.display = 'block';
+                loadStudentAiConfig();
             }
         }
+
+        // Toast for student
+        function showToast(message, type = 'success') {
+            const existing = document.querySelector('.toast');
+            if (existing) existing.remove();
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            requestAnimationFrame(() => toast.classList.add('show'));
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 2000);
+        }
+
+        // ===== Student AI Config =====
+        async function loadStudentAiConfig() {
+            const statusEl = document.getElementById('aiConfigStatusStudent');
+            try {
+                const result = await API.getAiConfigStatus();
+                if (result.code === 200) {
+                    const d = result.data;
+                    if (d.configured) {
+                        statusEl.innerHTML = `
+                            <div class="config-status-student">
+                                <div class="config-row">
+                                    <span class="cfg-label">状态</span>
+                                    <span class="status-badge connected">● 已连接</span>
+                                </div>
+                                <div class="config-row">
+                                    <span class="cfg-label">服务商</span>
+                                    <span class="cfg-value">${d.provider || '-'}</span>
+                                </div>
+                                <div class="config-row">
+                                    <span class="cfg-label">模型</span>
+                                    <span class="cfg-value">${d.model || '-'}</span>
+                                </div>
+                                <div class="config-row">
+                                    <span class="cfg-label">Base URL</span>
+                                    <span class="cfg-value" style="word-break:break-all;font-size:12px;">${d.base_url || '-'}</span>
+                                </div>
+                                <div class="config-row">
+                                    <span class="cfg-label">API Key</span>
+                                    <span class="cfg-value">${d.api_key_preview || '****'}</span>
+                                </div>
+                            </div>
+                        `;
+                        // 预填表单
+                        document.getElementById('stuCfgProvider').value = d.provider || '';
+                        document.getElementById('stuCfgModel').value = d.model || '';
+                        document.getElementById('stuCfgBaseUrl').value = d.base_url || '';
+                        document.getElementById('stuCfgApiKeyHint').textContent = '已配置，如需更换请输入新的 Key';
+                    } else {
+                        statusEl.innerHTML = `
+                            <div class="config-status-student">
+                                <div class="config-row">
+                                    <span class="cfg-label">状态</span>
+                                    <span class="status-badge disconnected">● 未配置</span>
+                                </div>
+                                <div class="config-row">
+                                    <span class="cfg-label">提示</span>
+                                    <span class="cfg-value">请在下方填写 AI 后端配置</span>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+            } catch {
+                statusEl.innerHTML = '<div class="error-msg">加载失败</div>';
+            }
+        }
+
+        // Test connection (student)
+        document.getElementById('btnTestConnectionStudent').addEventListener('click', async function() {
+            const btn = this;
+            const apiKey = document.getElementById('stuCfgApiKey').value.trim();
+            const baseUrl = document.getElementById('stuCfgBaseUrl').value.trim();
+            const model = document.getElementById('stuCfgModel').value.trim();
+
+            if (!apiKey || !baseUrl || !model) {
+                showToast('请填写 API Key、Base URL 和模型名', 'error');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = '⏳ 测试中...';
+            const resultDiv = document.getElementById('aiConfigResultStudent');
+            resultDiv.innerHTML = '';
+
+            try {
+                const result = await API.testAiConnection(apiKey, baseUrl, model);
+                if (result.code === 200) {
+                    resultDiv.innerHTML = '<div class="test-result-student success">✅ 连接成功！</div>';
+                } else {
+                    resultDiv.innerHTML = `<div class="test-result-student error">❌ ${result.message}</div>`;
+                }
+            } catch {
+                resultDiv.innerHTML = '<div class="test-result-student error">❌ 网络错误</div>';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🔗 测试连接';
+            }
+        });
+
+        // Save config (student)
+        document.getElementById('aiConfigFormStudent').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const provider = document.getElementById('stuCfgProvider').value.trim();
+            const apiKey = document.getElementById('stuCfgApiKey').value.trim();
+            const baseUrl = document.getElementById('stuCfgBaseUrl').value.trim();
+            const model = document.getElementById('stuCfgModel').value.trim();
+
+            if (!provider || !apiKey || !baseUrl || !model) {
+                showToast('所有字段均为必填', 'error');
+                return;
+            }
+
+            const submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ 保存中...';
+            const resultDiv = document.getElementById('aiConfigResultStudent');
+            resultDiv.innerHTML = '';
+
+            try {
+                const result = await API.saveAiConfig(provider, apiKey, baseUrl, model);
+                if (result.code === 200) {
+                    resultDiv.innerHTML = '<div class="test-result-student success">✅ 连接成功，配置已保存！</div>';
+                    showToast('AI 配置保存成功');
+                    loadStudentAiConfig();
+                } else {
+                    resultDiv.innerHTML = `<div class="test-result-student error">❌ ${result.message}</div>`;
+                }
+            } catch {
+                resultDiv.innerHTML = '<div class="test-result-student error">❌ 网络错误</div>';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '💾 保存配置';
+            }
+        });
 
         // Init
         loadStats();

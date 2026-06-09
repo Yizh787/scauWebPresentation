@@ -63,12 +63,133 @@ def get_ai_response(prompt, system_prompt=None):
 def get_ai_config_status():
     """获取 AI 配置状态"""
     config = load_ai_config()
+    api_key = config.get('api_key', '')
     return jsonify({
         'code': 200,
         'data': {
-            'provider': config.get('provider', 'deepseek'),
+            'provider': config.get('provider', ''),
             'model': config.get('model', ''),
-            'configured': bool(config.get('api_key'))
+            'base_url': config.get('base_url', ''),
+            'configured': bool(api_key),
+            'api_key_set': bool(api_key),
+            'api_key_preview': api_key[:8] + '****' + api_key[-4:] if len(api_key) > 12 else ('****' if api_key else '')
+        }
+    })
+
+
+@bp.route('/ai/config/save', methods=['POST'])
+def save_ai_config():
+    """保存 AI 配置（先测试连接）"""
+    data = request.get_json()
+    if not data:
+        return jsonify({'code': 400, 'message': '请求数据格式错误'}), 400
+
+    provider = data.get('provider', '').strip()
+    api_key = data.get('api_key', '').strip()
+    base_url = data.get('base_url', '').strip()
+    model = data.get('model', '').strip()
+
+    if not all([provider, api_key, base_url, model]):
+        return jsonify({'code': 400, 'message': '所有字段均为必填'}), 400
+
+    # 测试连接
+    try:
+        from langchain_openai import ChatOpenAI
+        from langchain_core.messages import HumanMessage
+
+        llm = ChatOpenAI(
+            api_key=api_key,
+            base_url=base_url,
+            model=model,
+            temperature=0.7,
+            timeout=15
+        )
+        response = llm.invoke([HumanMessage(content='你好，请回复"连接成功"')])
+        if not response or not response.content:
+            return jsonify({'code': 500, 'message': 'AI 服务返回为空，请检查配置'}), 500
+    except ImportError:
+        return jsonify({'code': 500, 'message': 'langchain-openai 未安装，请运行: pip install langchain-openai'}), 500
+    except Exception as e:
+        error_msg = str(e)
+        if 'auth' in error_msg.lower() or 'key' in error_msg.lower() or '401' in error_msg:
+            return jsonify({'code': 500, 'message': '连接失败：API Key 无效'}), 500
+        elif 'timeout' in error_msg.lower() or 'connect' in error_msg.lower():
+            return jsonify({'code': 500, 'message': '连接失败：无法连接到服务器，请检查 Base URL'}), 500
+        elif 'model' in error_msg.lower() or '404' in error_msg:
+            return jsonify({'code': 500, 'message': '连接失败：模型名称无效'}), 500
+        return jsonify({'code': 500, 'message': f'连接失败：{error_msg}'}), 500
+
+    # 连接成功，保存配置
+    config = {
+        'provider': provider,
+        'api_key': api_key,
+        'base_url': base_url,
+        'model': model,
+        'temperature': 0.7
+    }
+    try:
+        with open(AI_CONFIG_PATH, 'w', encoding='utf-8') as f:
+            json.dump(config, f, ensure_ascii=False, indent=4)
+    except Exception as e:
+        return jsonify({'code': 500, 'message': f'保存配置文件失败：{str(e)}'}), 500
+
+    return jsonify({
+        'code': 200,
+        'message': '连接成功，配置已保存',
+        'data': {
+            'provider': provider,
+            'model': model,
+            'base_url': base_url,
+            'api_key_preview': api_key[:8] + '****' + api_key[-4:] if len(api_key) > 12 else '****'
+        }
+    })
+
+
+@bp.route('/ai/config/test', methods=['POST'])
+def test_ai_connection():
+    """测试 AI 连接（不保存）"""
+    data = request.get_json()
+    if not data:
+        return jsonify({'code': 400, 'message': '请求数据格式错误'}), 400
+
+    api_key = data.get('api_key', '').strip()
+    base_url = data.get('base_url', '').strip()
+    model = data.get('model', '').strip()
+
+    if not all([api_key, base_url, model]):
+        return jsonify({'code': 400, 'message': 'API Key、Base URL、模型名均为必填'}), 400
+
+    try:
+        from langchain_openai import ChatOpenAI
+        from langchain_core.messages import HumanMessage
+
+        llm = ChatOpenAI(
+            api_key=api_key,
+            base_url=base_url,
+            model=model,
+            temperature=0.7,
+            timeout=15
+        )
+        response = llm.invoke([HumanMessage(content='你好，请回复"连接成功"')])
+        if not response or not response.content:
+            return jsonify({'code': 500, 'message': 'AI 服务返回为空，请检查配置'}), 500
+    except ImportError:
+        return jsonify({'code': 500, 'message': 'langchain-openai 未安装，请运行: pip install langchain-openai'}), 500
+    except Exception as e:
+        error_msg = str(e)
+        if 'auth' in error_msg.lower() or 'key' in error_msg.lower() or '401' in error_msg:
+            return jsonify({'code': 500, 'message': '连接失败：API Key 无效'}), 500
+        elif 'timeout' in error_msg.lower() or 'connect' in error_msg.lower():
+            return jsonify({'code': 500, 'message': '连接失败：无法连接到服务器，请检查 Base URL'}), 500
+        elif 'model' in error_msg.lower() or '404' in error_msg:
+            return jsonify({'code': 500, 'message': '连接失败：模型名称无效'}), 500
+        return jsonify({'code': 500, 'message': f'连接失败：{error_msg}'}), 500
+
+    return jsonify({
+        'code': 200,
+        'message': '连接成功',
+        'data': {
+            'response': response.content[:100] if response.content else ''
         }
     })
 

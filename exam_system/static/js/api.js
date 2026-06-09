@@ -160,6 +160,24 @@ const API = {
     async getAiConfigStatus() {
         const res = await fetch(`${API_BASE_URL}/ai/config`);
         return res.json();
+    },
+
+    async saveAiConfig(provider, apiKey, baseUrl, model) {
+        const res = await fetch(`${API_BASE_URL}/ai/config/save`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({provider, api_key: apiKey, base_url: baseUrl, model})
+        });
+        return res.json();
+    },
+
+    async testAiConnection(apiKey, baseUrl, model) {
+        const res = await fetch(`${API_BASE_URL}/ai/config/test`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({api_key: apiKey, base_url: baseUrl, model})
+        });
+        return res.json();
     }
 };
 

@@ -49,6 +49,10 @@
                     <span class="nav-icon">🤖</span>
                     <span class="nav-text">AI 出题</span>
                 </button>
+                <button class="nav-item" data-panel="ai-config">
+                    <span class="nav-icon">⚙️</span>
+                    <span class="nav-text">AI 后端管理</span>
+                </button>
             </div>
         </nav>
 
@@ -297,6 +301,52 @@
                         <h3>生成结果</h3>
                     </div>
                     <div id="aiResultContent"></div>
+                </div>
+            </div>
+
+            <!-- AI Config Panel -->
+            <div class="panel" id="panel-ai-config">
+                <div class="panel-header">
+                    <h2>AI 后端管理</h2>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>当前连接状态</h3>
+                    </div>
+                    <div id="aiConfigStatus" class="ai-config-status">
+                        <div class="loading">加载中...</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>配置 AI 后端</h3>
+                    </div>
+                    <form id="aiConfigForm" class="form-grid">
+                        <div class="form-group">
+                            <label>Provider（服务商）</label>
+                            <input type="text" id="cfgProvider" placeholder="如：deepseek、openai、xiaomimimo" required>
+                        </div>
+                        <div class="form-group">
+                            <label>模型名称</label>
+                            <input type="text" id="cfgModel" placeholder="如：deepseek-chat、gpt-4o" required>
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Base URL</label>
+                            <input type="text" id="cfgBaseUrl" placeholder="如：https://api.deepseek.com/v1" required>
+                        </div>
+                        <div class="form-group full-width">
+                            <label>API Key</label>
+                            <input type="password" id="cfgApiKey" placeholder="请输入 API Key" required>
+                            <div class="field-hint" id="cfgApiKeyHint"></div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" id="btnTestConnection">🔗 测试连接</button>
+                            <button type="submit" class="btn btn-primary">💾 保存配置</button>
+                        </div>
+                    </form>
+                    <div id="aiConfigResult" style="margin-top: 16px;"></div>
                 </div>
             </div>
         </main>
@@ -1152,6 +1202,134 @@
         // Init
         checkAiStatus();
         loadOverview();
-    </script>
+
+        // ===== AI Config Panel =====
+        async function loadAiConfigStatus() {
+            const statusEl = document.getElementById('aiConfigStatus');
+            try {
+                const result = await API.getAiConfigStatus();
+                if (result.code === 200) {
+                    const d = result.data;
+                    if (d.configured) {
+                        statusEl.innerHTML = `
+                            <div class="config-status-row">
+                                <span class="label">状态</span>
+                                <span class="connection-indicator connected">● 已连接</span>
+                            </div>
+                            <div class="config-status-row">
+                                <span class="label">服务商</span>
+                                <span class="value">${d.provider || '-'}</span>
+                            </div>
+                            <div class="config-status-row">
+                                <span class="label">模型</span>
+                                <span class="value">${d.model || '-'}</span>
+                            </div>
+                            <div class="config-status-row">
+                                <span class="label">Base URL</span>
+                                <span class="value">${d.base_url || '-'}</span>
+                            </div>
+                            <div class="config-status-row">
+                                <span class="label">API Key</span>
+                                <span class="value">${d.api_key_preview || '****'}</span>
+                            </div>
+                        `;
+                        // 预填表单
+                        document.getElementById('cfgProvider').value = d.provider || '';
+                        document.getElementById('cfgModel').value = d.model || '';
+                        document.getElementById('cfgBaseUrl').value = d.base_url || '';
+                        document.getElementById('cfgApiKeyHint').textContent = '已配置 API Key，如需更换请输入新的 Key';
+                    } else {
+                        statusEl.innerHTML = `
+                            <div class="config-status-row">
+                                <span class="label">状态</span>
+                                <span class="connection-indicator disconnected">● 未配置</span>
+                            </div>
+                            <div class="config-status-row">
+                                <span class="label">提示</span>
+                                <span class="value">请在下方填写 AI 后端配置信息</span>
+                            </div>
+                        `;
+                    }
+                }
+            } catch {
+                statusEl.innerHTML = '<div class="error-msg">加载配置状态失败</div>';
+            }
+        }
+
+        // Switch panel hook
+        const origSwitchPanel = switchPanel;
+        switchPanel = function(name) {
+            origSwitchPanel(name);
+            if (name === 'ai-config') loadAiConfigStatus();
+        };
+
+        // Test connection
+        document.getElementById('btnTestConnection').addEventListener('click', async function() {
+            const btn = this;
+            const apiKey = document.getElementById('cfgApiKey').value.trim();
+            const baseUrl = document.getElementById('cfgBaseUrl').value.trim();
+            const model = document.getElementById('cfgModel').value.trim();
+
+            if (!apiKey || !baseUrl || !model) {
+                showToast('请填写 API Key、Base URL 和模型名', 'error');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = '⏳ 测试中...';
+            const resultDiv = document.getElementById('aiConfigResult');
+            resultDiv.innerHTML = '';
+
+            try {
+                const result = await API.testAiConnection(apiKey, baseUrl, model);
+                if (result.code === 200) {
+                    resultDiv.innerHTML = '<div class="test-result success">✅ 连接成功！AI 服务可正常使用</div>';
+                } else {
+                    resultDiv.innerHTML = `<div class="test-result error">❌ ${result.message}</div>`;
+                }
+            } catch {
+                resultDiv.innerHTML = '<div class="test-result error">❌ 网络错误，请检查连接</div>';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🔗 测试连接';
+            }
+        });
+
+        // Save config
+        document.getElementById('aiConfigForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const provider = document.getElementById('cfgProvider').value.trim();
+            const apiKey = document.getElementById('cfgApiKey').value.trim();
+            const baseUrl = document.getElementById('cfgBaseUrl').value.trim();
+            const model = document.getElementById('cfgModel').value.trim();
+
+            if (!provider || !apiKey || !baseUrl || !model) {
+                showToast('所有字段均为必填', 'error');
+                return;
+            }
+
+            const submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ 连接并保存中...';
+            const resultDiv = document.getElementById('aiConfigResult');
+            resultDiv.innerHTML = '';
+
+            try {
+                const result = await API.saveAiConfig(provider, apiKey, baseUrl, model);
+                if (result.code === 200) {
+                    resultDiv.innerHTML = '<div class="test-result success">✅ 连接成功，配置已保存！</div>';
+                    showToast('AI 配置保存成功');
+                    loadAiConfigStatus();
+                    checkAiStatus();
+                } else {
+                    resultDiv.innerHTML = `<div class="test-result error">❌ ${result.message}</div>`;
+                }
+            } catch {
+                resultDiv.innerHTML = '<div class="test-result error">❌ 网络错误，请检查连接</div>';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '💾 保存配置';
+            }
+        });
 </body>
 </html>
