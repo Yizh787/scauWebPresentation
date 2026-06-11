@@ -11,17 +11,30 @@ import random
 
 @bp.route('/students', methods=['GET'])
 def get_students():
-    """获取所有学生列表（管理员）"""
+    """获取所有学生列表（管理员）- 优化版"""
+    from sqlalchemy import func
+
     students = User.query.filter_by(role=0).order_by(User.create_time.desc()).all()
+    if not students:
+        return jsonify({'code': 200, 'data': []})
+
+    student_ids = [s.id for s in students]
+
+    # 批量查询每个学生的已完成考试数量
+    exam_counts = dict(
+        db.session.query(ExamRecord.user_id, func.count(ExamRecord.id))
+        .filter(ExamRecord.user_id.in_(student_ids), ExamRecord.end_time.isnot(None))
+        .group_by(ExamRecord.user_id)
+        .all()
+    )
 
     result = []
     for s in students:
-        exam_count = ExamRecord.query.filter_by(user_id=s.id).filter(ExamRecord.end_time.isnot(None)).count()
         result.append({
             'id': s.id,
             'username': s.username,
             'create_time': s.create_time.strftime('%Y-%m-%d %H:%M:%S') if s.create_time else None,
-            'exam_count': exam_count
+            'exam_count': exam_counts.get(s.id, 0)
         })
 
     return jsonify({
@@ -367,19 +380,50 @@ def get_all_exam_records():
 
 @bp.route('/exams/manage', methods=['GET'])
 def get_exams_manage():
-    """获取所有考试及参与情况（管理员）"""
+    """获取所有考试及参与情况（管理员）- 优化版"""
+    from sqlalchemy import func
+
+    # 一次性查询所有考试
     exams = Exam.query.order_by(Exam.create_time.desc()).all()
+    if not exams:
+        return jsonify({'code': 200, 'data': []})
+
+    exam_ids = [e.id for e in exams]
+
+    # 批量查询每个考试的题目数量
+    question_counts = dict(
+        db.session.query(ExamQuestion.exam_id, func.count(ExamQuestion.id))
+        .filter(ExamQuestion.exam_id.in_(exam_ids))
+        .group_by(ExamQuestion.exam_id)
+        .all()
+    )
+
+    # 批量查询所有考试记录
+    all_records = ExamRecord.query.filter(ExamRecord.exam_id.in_(exam_ids)).all()
+
+    # 按 exam_id 分组记录
+    records_by_exam = {}
+    for r in all_records:
+        if r.exam_id not in records_by_exam:
+            records_by_exam[r.exam_id] = []
+        records_by_exam[r.exam_id].append(r)
+
+    # 批量查询所有相关用户
+    user_ids = list(set(r.user_id for r in all_records if r.end_time is not None))
+    users_map = {}
+    if user_ids:
+        users = User.query.filter(User.id.in_(user_ids)).all()
+        users_map = {u.id: u for u in users}
 
     result = []
     for exam in exams:
-        question_count = ExamQuestion.query.filter_by(exam_id=exam.id).count()
-        records = ExamRecord.query.filter_by(exam_id=exam.id).all()
+        records = records_by_exam.get(exam.id, [])
         completed = [r for r in records if r.end_time is not None]
         in_progress = [r for r in records if r.end_time is None]
 
         participants = []
         for r in completed:
-            user = User.query.get(r.user_id)
+            user = users_map.get(r.user_id)
             participants.append({
                 'username': user.username if user else '未知用户',
                 'score': r.score,
@@ -389,7 +433,7 @@ def get_exams_manage():
 
         result.append({
             'exam': exam.to_dict(),
-            'question_count': question_count,
+            'question_count': question_counts.get(exam.id, 0),
             'completed_count': len(completed),
             'in_progress_count': len(in_progress),
             'participants': participants

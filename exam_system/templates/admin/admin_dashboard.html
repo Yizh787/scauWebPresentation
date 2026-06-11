@@ -1199,10 +1199,6 @@
             return str.length > len ? str.slice(0, len) + '...' : str;
         }
 
-        // Init
-        checkAiStatus();
-        loadOverview();
-
         // ===== AI Config Panel =====
         async function loadAiConfigStatus() {
             const statusEl = document.getElementById('aiConfigStatus');
@@ -1331,5 +1327,13 @@
                 submitBtn.textContent = '💾 保存配置';
             }
         });
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', function() {
+            checkAiStatus();
+            loadOverview();
+            loadAiConfigStatus();
+        });
+    </script>
 </body>
 </html>
