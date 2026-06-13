@@ -521,6 +521,136 @@
 
         .toast-success { background: #27ae60; }
         .toast-error { background: #e74c3c; }
+
+        /* Training section */
+        .training-difficulty-row {
+            display: flex;
+            gap: 12px;
+        }
+
+        .training-radio {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .training-radio:hover {
+            background: #e9ecef;
+        }
+
+        .training-radio input[type="radio"] {
+            accent-color: #2d8a2d;
+        }
+
+        .training-count-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .training-count-row input[type="range"] {
+            flex: 1;
+            accent-color: #2d8a2d;
+            height: 6px;
+        }
+
+        .training-count-label {
+            font-size: 15px;
+            font-weight: 600;
+            color: #2d8a2d;
+            min-width: 48px;
+            text-align: center;
+        }
+
+        .training-history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 8px;
+        }
+
+        .training-history-item:last-child { margin-bottom: 0; }
+
+        .training-history-item .history-info .history-topic {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .training-history-item .history-info .history-meta {
+            font-size: 11px;
+            color: #999;
+            margin-top: 2px;
+        }
+
+        .training-history-item .history-score {
+            font-size: 16px;
+            font-weight: 700;
+            color: #2d8a2d;
+        }
+
+        .training-history-item .history-score.fail {
+            color: #e74c3c;
+        }
+
+        /* Training progress bar */
+        .training-progress {
+            margin-top: 16px;
+            padding: 16px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .training-progress .progress-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .training-progress .progress-text {
+            font-size: 14px;
+            font-weight: 500;
+            color: #2d8a2d;
+        }
+
+        .training-progress .progress-percent {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2d8a2d;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .training-progress .progress-bar-container {
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .training-progress .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #1a5c1a, #2d8a2d, #3da33d);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .training-progress .progress-hint {
+            font-size: 12px;
+            color: #999;
+            margin-top: 10px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -591,7 +721,7 @@
         <!-- Settings: AI Config -->
         <div class="section-card" id="settingsSection" style="display:none;">
             <div class="section-header">
-                <h3><span class="icon">🤖</span> AI 后端管理</h3>
+                <h3><span class="icon">⚙️</span> AI 后端管理</h3>
             </div>
 
             <div id="aiConfigStatusStudent" style="margin-bottom:16px;">
@@ -623,6 +753,55 @@
             </form>
             <div id="aiConfigResultStudent" style="margin-top:12px;"></div>
         </div>
+
+        <!-- AI Training -->
+        <div class="section-card" id="trainingSection" style="display:none;">
+            <div class="section-header">
+                <h3><span class="icon">🤖</span> AI 自由训练</h3>
+            </div>
+            <p style="font-size:13px; color:#999; margin-bottom:18px;">自由选择知识点和题数，AI 帮你出题练习，结果仅保存在本地，老师不可见。</p>
+
+            <div class="form-field">
+                <label>知识点</label>
+                <input type="text" id="trainingKnowledge" placeholder="如：数据结构、计算机网络（留空默认计算机基础）">
+            </div>
+            <div class="form-field">
+                <label>难度</label>
+                <div class="training-difficulty-row">
+                    <label class="training-radio"><input type="radio" name="trainingDifficulty" value="1"> 简单</label>
+                    <label class="training-radio"><input type="radio" name="trainingDifficulty" value="2" checked> 中等</label>
+                    <label class="training-radio"><input type="radio" name="trainingDifficulty" value="3"> 困难</label>
+                </div>
+            </div>
+            <div class="form-field">
+                <label>题目数量</label>
+                <div class="training-count-row">
+                    <input type="range" id="trainingCount" min="1" max="10" value="5" oninput="document.getElementById('trainingCountLabel').textContent=this.value+' 道'">
+                    <span id="trainingCountLabel" class="training-count-label">5 道</span>
+                </div>
+            </div>
+            <button class="save-btn" id="btnStartTraining" onclick="startTraining()" style="width:100%; margin-top:10px;">🚀 开始出题</button>
+            <div id="trainingProgress" class="training-progress" style="display:none;">
+                <div class="progress-info">
+                    <span class="progress-text">🤖 AI 正在出题...</span>
+                    <span class="progress-percent" id="trainingProgressPercent">0%</span>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill" id="trainingProgressFill"></div>
+                </div>
+                <div class="progress-hint">请稍候，正在为您生成个性化题目</div>
+            </div>
+            <div id="trainingError" style="margin-top:10px;"></div>
+
+            <!-- Training history -->
+            <div style="margin-top:24px;">
+                <div class="section-header">
+                    <h3><span class="icon">📋</span> 训练历史</h3>
+                    <span class="count-badge" id="trainingHistoryCount" style="display:none;">0</span>
+                </div>
+                <div id="trainingHistoryList"></div>
+            </div>
+        </div>
     </div>
 
     <div class="nav-bar">
@@ -641,6 +820,10 @@
         <div class="nav-item" onclick="showTab('settings')">
             <span class="icon">⚙️</span>
             <span>设置</span>
+        </div>
+        <div class="nav-item" onclick="showTab('training')">
+            <span class="icon">🤖</span>
+            <span>AI训练</span>
         </div>
     </div>
 
@@ -870,6 +1053,7 @@
             const examSection = document.getElementById('examSection');
             const recordSection = document.getElementById('recordSection');
             const settingsSection = document.getElementById('settingsSection');
+            const trainingSection = document.getElementById('trainingSection');
             const statsStrip = document.getElementById('statsStrip');
             const activeBanner = document.getElementById('activeExamBanner');
             const greeting = document.querySelector('.greeting');
@@ -880,6 +1064,7 @@
             examSection.style.display = 'none';
             recordSection.style.display = 'none';
             settingsSection.style.display = 'none';
+            trainingSection.style.display = 'none';
 
             if (tab === 'exam') {
                 statsStrip.style.display = '';
@@ -909,6 +1094,12 @@
                 greeting.style.display = 'none';
                 settingsSection.style.display = 'block';
                 loadStudentAiConfig();
+            } else if (tab === 'training') {
+                statsStrip.style.display = 'none';
+                activeBanner.style.display = 'none';
+                greeting.style.display = 'none';
+                trainingSection.style.display = 'block';
+                loadTrainingHistory();
             }
         }
 
@@ -1051,6 +1242,143 @@
                 submitBtn.textContent = '💾 保存配置';
             }
         });
+
+        // ===== AI Training =====
+        let trainingProgressInterval = null;
+
+        function startTrainingProgress() {
+            const progressDiv = document.getElementById('trainingProgress');
+            const progressFill = document.getElementById('trainingProgressFill');
+            const progressPercent = document.getElementById('trainingProgressPercent');
+            const btn = document.getElementById('btnStartTraining');
+
+            progressDiv.style.display = 'block';
+            btn.disabled = true;
+            btn.textContent = '⏳ AI 出题中...';
+
+            let progress = 0;
+            progressFill.style.width = '0%';
+            progressPercent.textContent = '0%';
+
+            // Simulate progress: slow start, then gradual increase
+            trainingProgressInterval = setInterval(() => {
+                if (progress < 90) {
+                    // Slower at start, faster in middle
+                    const increment = progress < 30 ? 2 : (progress < 60 ? 3 : 4);
+                    progress = Math.min(progress + increment, 90);
+                    progressFill.style.width = progress + '%';
+                    progressPercent.textContent = progress + '%';
+                }
+            }, 200);
+        }
+
+        function completeTrainingProgress(success = true) {
+            const progressFill = document.getElementById('trainingProgressFill');
+            const progressPercent = document.getElementById('trainingProgressPercent');
+
+            if (trainingProgressInterval) {
+                clearInterval(trainingProgressInterval);
+                trainingProgressInterval = null;
+            }
+
+            if (success) {
+                // Quickly jump to 100%
+                progressFill.style.width = '100%';
+                progressPercent.textContent = '100%';
+            }
+        }
+
+        function resetTrainingUI() {
+            const progressDiv = document.getElementById('trainingProgress');
+            const btn = document.getElementById('btnStartTraining');
+
+            if (trainingProgressInterval) {
+                clearInterval(trainingProgressInterval);
+                trainingProgressInterval = null;
+            }
+
+            progressDiv.style.display = 'none';
+            btn.disabled = false;
+            btn.textContent = '🚀 开始出题';
+        }
+
+        async function startTraining() {
+            const knowledge = document.getElementById('trainingKnowledge').value.trim();
+            const difficultyEl = document.querySelector('input[name="trainingDifficulty"]:checked');
+            const difficulty = difficultyEl ? parseInt(difficultyEl.value) : 2;
+            const count = parseInt(document.getElementById('trainingCount').value);
+            const errorDiv = document.getElementById('trainingError');
+
+            errorDiv.innerHTML = '';
+            startTrainingProgress();
+
+            try {
+                const result = await API.aiTrainingGenerate(knowledge, difficulty, count);
+                if (result.code === 200) {
+                    completeTrainingProgress(true);
+                    // Save questions to localStorage
+                    const trainingData = {
+                        questions: result.data.questions,
+                        knowledge: result.data.knowledge,
+                        difficulty: result.data.difficulty,
+                        count: result.data.count,
+                        timestamp: Date.now()
+                    };
+                    localStorage.setItem('ai_training_questions', JSON.stringify(trainingData));
+                    // Brief delay for visual feedback before navigation
+                    setTimeout(() => {
+                        window.location.href = '/student/training_exam.html';
+                    }, 300);
+                } else {
+                    completeTrainingProgress(false);
+                    resetTrainingUI();
+                    errorDiv.innerHTML = `<div class="test-result-student error">❌ ${result.message}</div>`;
+                }
+            } catch (err) {
+                completeTrainingProgress(false);
+                resetTrainingUI();
+                errorDiv.innerHTML = '<div class="test-result-student error">❌ 网络错误，请检查连接</div>';
+            }
+        }
+
+        function loadTrainingHistory() {
+            try {
+                const history = JSON.parse(localStorage.getItem('ai_training_history') || '[]');
+                const listEl = document.getElementById('trainingHistoryList');
+                const countEl = document.getElementById('trainingHistoryCount');
+
+                if (history.length > 0) {
+                    countEl.textContent = history.length;
+                    countEl.style.display = 'inline';
+                    listEl.innerHTML = history.slice(0, 10).map(item => {
+                        const isPass = item.total > 0 && (item.score / item.total) >= 0.6;
+                        const diffText = {1: '简单', 2: '中等', 3: '困难'}[item.difficulty] || '中等';
+                        const date = new Date(item.timestamp);
+                        const dateStr = `${date.getMonth()+1}/${date.getDate()} ${date.getHours().toString().padStart(2,'0')}:${date.getMinutes().toString().padStart(2,'0')}`;
+                        return `
+                            <div class="training-history-item">
+                                <div class="history-info">
+                                    <div class="history-topic">${item.knowledge || '计算机基础'}</div>
+                                    <div class="history-meta">${diffText} · ${item.total}题 · ${dateStr}</div>
+                                </div>
+                                <div class="history-score ${isPass ? '' : 'fail'}">${item.score}/${item.total}</div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    countEl.style.display = 'none';
+                    listEl.innerHTML = `
+                        <div class="empty-state">
+                            <div class="icon">📭</div>
+                            <p>暂无训练记录</p>
+                            <div class="hint">开始第一次 AI 训练吧</div>
+                        </div>
+                    `;
+                }
+            } catch (e) {
+                // Ignore
+            }
+        }
 
         // Init
         loadStats();

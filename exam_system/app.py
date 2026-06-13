@@ -53,6 +53,10 @@ def create_app():
     def wrong_explain():
         return render_template('student/wrong_explain.html')
 
+    @app.route('/student/training_exam.html')
+    def training_exam():
+        return render_template('student/training_exam.html')
+
     @app.route('/health')
     def health():
         return {'status': 'ok'}

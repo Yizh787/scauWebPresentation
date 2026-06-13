@@ -331,6 +331,86 @@ def ai_generate_questions():
         return jsonify({'code': 500, 'message': 'AI 返回格式错误，无法解析'}), 500
 
 
+@bp.route('/ai/training/generate', methods=['POST'])
+def ai_training_generate():
+    """AI 训练模式出题（不存数据库，仅返回题目）"""
+    data = request.get_json()
+
+    if not data:
+        return jsonify({'code': 400, 'message': '请求数据格式错误'}), 400
+
+    knowledge = data.get('knowledge', '')
+    difficulty = data.get('difficulty', 2)
+    count = min(int(data.get('count', 5)), 10)
+
+    system_prompt = """你是一位专业的出题老师，请根据用户需求生成高质量的选择题。
+要求：
+1. 题目清晰明了，不能有歧义
+2. 选项之间区分度明显
+3. 正确答案必须唯一
+4. 知识点覆盖准确
+
+请以 JSON 格式返回，格式如下：
+{{
+  "questions": [
+    {{
+      "question_text": "题目内容",
+      "option_a": "A选项内容",
+      "option_b": "B选项内容",
+      "option_c": "C选项内容",
+      "option_d": "D选项内容",
+      "answer": "正确答案字母",
+      "knowledge": "知识点",
+      "difficulty": 难度等级(1-3),
+      "score": 分值
+    }}
+  ]
+}}"""
+
+    difficulty_text = {1: "简单", 2: "中等", 3: "困难"}
+    prompt = f"""请生成 {count} 道 {difficulty_text.get(difficulty, '中等')} 难度、知识点为「{knowledge if knowledge else '计算机基础'}」的选择题。"""
+
+    response_text, error = get_ai_response(prompt, system_prompt)
+
+    if error:
+        return jsonify({'code': 500, 'message': error}), 500
+
+    try:
+        cleaned = re.sub(r'```(?:json)?\s*', '', response_text).strip().rstrip('`').strip()
+        result = json.loads(cleaned)
+        questions = result.get('questions', [])
+
+        # 不存数据库，直接返回
+        formatted_questions = []
+        for idx, q in enumerate(questions):
+            formatted_questions.append({
+                'id': idx,
+                'question_text': q.get('question_text', ''),
+                'option_a': q.get('option_a', ''),
+                'option_b': q.get('option_b', ''),
+                'option_c': q.get('option_c', ''),
+                'option_d': q.get('option_d', ''),
+                'answer': q.get('answer', 'A').upper(),
+                'knowledge': q.get('knowledge', knowledge),
+                'difficulty': int(q.get('difficulty', difficulty)),
+                'score': int(q.get('score', 2))
+            })
+
+        return jsonify({
+            'code': 200,
+            'message': f'成功生成 {len(formatted_questions)} 道题目',
+            'data': {
+                'questions': formatted_questions,
+                'knowledge': knowledge or '计算机基础',
+                'difficulty': difficulty,
+                'count': len(formatted_questions)
+            }
+        })
+
+    except json.JSONDecodeError:
+        return jsonify({'code': 500, 'message': 'AI 返回格式错误，无法解析'}), 500
+
+
 @bp.route('/ai/summary', methods=['POST'])
 def ai_summary():
     """AI 生成考试总结"""

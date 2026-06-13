@@ -148,6 +148,15 @@ const API = {
         return res.json();
     },
 
+    async aiTrainingGenerate(knowledge, difficulty, count) {
+        const res = await fetch(`${API_BASE_URL}/ai/training/generate`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({knowledge, difficulty, count})
+        });
+        return res.json();
+    },
+
     async aiSummary(recordId) {
         const res = await fetch(`${API_BASE_URL}/ai/summary`, {
             method: 'POST',
