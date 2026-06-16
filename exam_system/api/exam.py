@@ -523,9 +523,10 @@ def get_exam_ranking(exam_id):
         prev_score = record.score
 
         user = users_map.get(record.user_id)
+        display_name = (user.nickname or user.username) if user else '未知用户'
         entry = {
             'rank': rank,
-            'username': user.username if user else '未知用户',
+            'username': display_name,
             'score': record.score,
             'total_score': record.total_score,
             'end_time': record.end_time.strftime('%Y-%m-%d %H:%M:%S') if record.end_time else None

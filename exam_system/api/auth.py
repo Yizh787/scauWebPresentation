@@ -37,6 +37,7 @@ def register():
 
     username = data.get('username', '').strip()
     password = data.get('password', '')
+    nickname = data.get('nickname', '').strip() or None
     role = data.get('role', 0)
 
     if not validate_username(username):
@@ -57,6 +58,7 @@ def register():
     new_user = User(
         username=username,
         password=hashed_password,
+        nickname=nickname,
         role=role
     )
 
@@ -101,6 +103,7 @@ def login():
         'data': {
             'id': user.id,
             'username': user.username,
+            'nickname': user.nickname,
             'role': user.role,
             'avatar': user.avatar
         }

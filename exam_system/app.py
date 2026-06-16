@@ -18,6 +18,41 @@ def create_app():
 
     db.init_app(app)
 
+    # 自动添加缺失的列（兼容旧数据库）
+    with app.app_context():
+        try:
+            import sqlite3
+            db_uri = app.config['SQLALCHEMY_DATABASE_URI']
+            if db_uri.startswith('sqlite:///'):
+                db_path = db_uri.replace('sqlite:///', '')
+                conn = sqlite3.connect(db_path)
+                cursor = conn.cursor()
+
+                # 检查并添加 exams.shuffle_enabled
+                cursor.execute("PRAGMA table_info(exams)")
+                cols = [col[1] for col in cursor.fetchall()]
+                if 'shuffle_enabled' not in cols:
+                    cursor.execute("ALTER TABLE exams ADD COLUMN shuffle_enabled SMALLINT DEFAULT 0")
+
+                # 检查并添加 exam_records.shuffle_data
+                cursor.execute("PRAGMA table_info(exam_records)")
+                cols = [col[1] for col in cursor.fetchall()]
+                if 'shuffle_data' not in cols:
+                    cursor.execute("ALTER TABLE exam_records ADD COLUMN shuffle_data TEXT")
+
+                # 检查并添加 users.nickname
+                cursor.execute("PRAGMA table_info(users)")
+                cols = [col[1] for col in cursor.fetchall()]
+                if 'nickname' not in cols:
+                    cursor.execute("ALTER TABLE users ADD COLUMN nickname VARCHAR(50)")
+
+                conn.commit()
+                conn.close()
+        except Exception as e:
+            print(f"列迁移检查: {e}")
+
+        db.create_all()
+
     from api import bp as api_bp
     app.register_blueprint(api_bp)
 
@@ -68,36 +103,6 @@ def init_database():
     """初始化数据库表并添加默认管理员账号"""
     app = create_app()
     with app.app_context():
-        # 自动添加缺失的列（兼容旧数据库）
-        try:
-            import sqlite3
-            db_uri = app.config['SQLALCHEMY_DATABASE_URI']
-            if db_uri.startswith('sqlite:///'):
-                db_path = db_uri.replace('sqlite:///', '')
-                conn = sqlite3.connect(db_path)
-                cursor = conn.cursor()
-
-                # 检查并添加 exams.shuffle_enabled
-                cursor.execute("PRAGMA table_info(exams)")
-                cols = [col[1] for col in cursor.fetchall()]
-                if 'shuffle_enabled' not in cols:
-                    cursor.execute("ALTER TABLE exams ADD COLUMN shuffle_enabled SMALLINT DEFAULT 0")
-                    print("已添加 exams.shuffle_enabled 列")
-
-                # 检查并添加 exam_records.shuffle_data
-                cursor.execute("PRAGMA table_info(exam_records)")
-                cols = [col[1] for col in cursor.fetchall()]
-                if 'shuffle_data' not in cols:
-                    cursor.execute("ALTER TABLE exam_records ADD COLUMN shuffle_data TEXT")
-                    print("已添加 exam_records.shuffle_data 列")
-
-                conn.commit()
-                conn.close()
-        except Exception as e:
-            print(f"列迁移检查: {e}")
-
-        db.create_all()
-
         from models import User
         import hashlib
 

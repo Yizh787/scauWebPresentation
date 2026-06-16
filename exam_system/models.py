@@ -13,6 +13,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
+    nickname = db.Column(db.String(50), nullable=True)
     role = db.Column(db.SmallInteger, default=0)
     avatar = db.Column(db.String(255), nullable=True)
     create_time = db.Column(db.DateTime, default=datetime.now)
@@ -21,6 +22,7 @@ class User(db.Model):
         return {
             'id': self.id,
             'username': self.username,
+            'nickname': self.nickname,
             'role': self.role,
             'avatar': self.avatar,
             'create_time': self.create_time.strftime('%Y-%m-%d %H:%M:%S') if self.create_time else None

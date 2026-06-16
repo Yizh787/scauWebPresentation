@@ -1154,6 +1154,7 @@
         }
 
         // Greeting
+        const displayName = user.nickname || user.username;
         const hour = new Date().getHours();
         let greeting = '你好';
         if (hour < 6) greeting = '夜深了';
@@ -1161,7 +1162,8 @@
         else if (hour < 14) greeting = '中午好';
         else if (hour < 18) greeting = '下午好';
         else greeting = '晚上好';
-        document.getElementById('greetingText').textContent = `${greeting}，${user.username}`;
+        document.getElementById('greetingText').textContent = `${greeting}，${displayName}`;
+        document.getElementById('username').textContent = displayName;
 
         const today = new Date();
         const weekdays = ['日', '一', '二', '三', '四', '五', '六'];

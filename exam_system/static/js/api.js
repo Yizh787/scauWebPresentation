@@ -1,11 +1,11 @@
 const API_BASE_URL = 'http://localhost:5000/api';
 
 const API = {
-    async register(username, password, role = 0) {
+    async register(username, password, role = 0, nickname = '') {
         const res = await fetch(`${API_BASE_URL}/register`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({username, password, role})
+            body: JSON.stringify({username, password, role, nickname})
         });
         return res.json();
     },
