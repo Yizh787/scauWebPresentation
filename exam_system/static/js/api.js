@@ -70,6 +70,13 @@ const API = {
         return res.json();
     },
 
+    async getExamRanking(examId, userId) {
+        let url = `${API_BASE_URL}/exam/${examId}/ranking`;
+        if (userId) url += `?user_id=${userId}`;
+        const res = await fetch(url);
+        return res.json();
+    },
+
     async getAllExamRecords() {
         const res = await fetch(`${API_BASE_URL}/exam/records/all`);
         return res.json();

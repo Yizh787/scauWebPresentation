@@ -522,6 +522,309 @@
         .toast-success { background: #27ae60; }
         .toast-error { background: #e74c3c; }
 
+        /* Ranking button in record item */
+        .record-item .rank-btn {
+            background: none;
+            border: 1.5px solid #e0e0e0;
+            padding: 5px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            margin-left: 10px;
+        }
+
+        .record-item .rank-btn:hover {
+            border-color: #2d8a2d;
+            color: #2d8a2d;
+            background: #e8f5e9;
+        }
+
+        .record-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        /* Ranking modal overlay */
+        .ranking-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 3000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.25s, visibility 0.25s;
+        }
+
+        .ranking-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .ranking-modal {
+            background: white;
+            border-radius: 18px;
+            width: 92%;
+            max-width: 440px;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            transform: scale(0.9) translateY(20px);
+            transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+            overflow: hidden;
+        }
+
+        .ranking-overlay.show .ranking-modal {
+            transform: scale(1) translateY(0);
+        }
+
+        .ranking-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 20px 14px;
+            border-bottom: 1px solid #f0f0f0;
+            flex-shrink: 0;
+        }
+
+        .ranking-header h3 {
+            font-size: 17px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .ranking-header .close-btn {
+            background: #f0f0f0;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            font-size: 16px;
+            color: #666;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .ranking-header .close-btn:hover {
+            background: #e0e0e0;
+        }
+
+        .ranking-body {
+            padding: 16px 20px 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        /* My rank card */
+        .my-rank-card {
+            background: linear-gradient(135deg, #1a5c1a 0%, #2d8a2d 100%);
+            border-radius: 14px;
+            padding: 16px;
+            color: white;
+            margin-bottom: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .my-rank-card::before {
+            content: '';
+            position: absolute;
+            top: -30%;
+            right: -10%;
+            width: 80px;
+            height: 80px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 50%;
+        }
+
+        .my-rank-card .my-rank-label {
+            font-size: 12px;
+            opacity: 0.85;
+            margin-bottom: 6px;
+        }
+
+        .my-rank-card .my-rank-main {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .my-rank-card .my-rank-position {
+            font-size: 32px;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .my-rank-card .my-rank-position .rank-suffix {
+            font-size: 16px;
+            font-weight: 500;
+            opacity: 0.8;
+        }
+
+        .my-rank-card .my-rank-score {
+            text-align: right;
+        }
+
+        .my-rank-card .my-rank-score .score-value {
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .my-rank-card .my-rank-score .score-total {
+            font-size: 13px;
+            opacity: 0.8;
+        }
+
+        .my-rank-card .my-rank-empty {
+            text-align: center;
+            font-size: 14px;
+            opacity: 0.85;
+            padding: 4px 0;
+        }
+
+        /* Ranking list */
+        .ranking-list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .ranking-list-header h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .ranking-list-header .total-count {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .ranking-row {
+            display: flex;
+            align-items: center;
+            padding: 11px 12px;
+            border-radius: 10px;
+            margin-bottom: 6px;
+            transition: background 0.15s;
+        }
+
+        .ranking-row:nth-child(odd) {
+            background: #f8f9fa;
+        }
+
+        .ranking-row.is-me {
+            background: #e8f5e9;
+            border: 1.5px solid #c8e6c9;
+        }
+
+        .ranking-row .rank-num {
+            width: 32px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #666;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .ranking-row .rank-num.top-1 { color: #f39c12; font-size: 18px; }
+        .ranking-row .rank-num.top-2 { color: #95a5a6; font-size: 17px; }
+        .ranking-row .rank-num.top-3 { color: #cd6133; font-size: 17px; }
+
+        .ranking-row .rank-name {
+            flex: 1;
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+            margin-left: 4px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .ranking-row .rank-name .me-tag {
+            font-size: 11px;
+            background: #2d8a2d;
+            color: white;
+            padding: 1px 6px;
+            border-radius: 8px;
+            margin-left: 6px;
+            font-weight: 500;
+        }
+
+        .ranking-row .rank-score {
+            font-size: 15px;
+            font-weight: 700;
+            color: #2d8a2d;
+            margin-left: 10px;
+            flex-shrink: 0;
+        }
+
+        .ranking-row .rank-score .rank-total {
+            font-size: 12px;
+            font-weight: 400;
+            color: #999;
+        }
+
+        .ranking-row .rank-time {
+            font-size: 11px;
+            color: #bbb;
+            margin-left: 10px;
+            flex-shrink: 0;
+            min-width: 44px;
+            text-align: right;
+        }
+
+        /* Ranking loading / empty */
+        .ranking-loading {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .ranking-loading .spinner {
+            width: 28px;
+            height: 28px;
+            border: 3px solid #e0e0e0;
+            border-top-color: #2d8a2d;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 12px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .ranking-empty {
+            text-align: center;
+            padding: 32px 20px;
+            color: #999;
+        }
+
+        .ranking-empty .icon {
+            font-size: 36px;
+            margin-bottom: 8px;
+        }
+
+        .ranking-empty p {
+            font-size: 14px;
+        }
+
         /* Training section */
         .training-difficulty-row {
             display: flex;
@@ -827,6 +1130,22 @@
         </div>
     </div>
 
+    <!-- Ranking Modal -->
+    <div class="ranking-overlay" id="rankingOverlay" onclick="if(event.target===this)closeRanking()">
+        <div class="ranking-modal">
+            <div class="ranking-header">
+                <h3 id="rankingTitle">🏆 排行榜</h3>
+                <button class="close-btn" onclick="closeRanking()">✕</button>
+            </div>
+            <div class="ranking-body" id="rankingBody">
+                <div class="ranking-loading">
+                    <div class="spinner"></div>
+                    <p>加载中...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="../../static/js/api.js"></script>
     <script>
         const user = Auth.requireAuth();
@@ -977,7 +1296,10 @@
                                     <div class="exam-name">${record.exam_name}</div>
                                     <div class="exam-date">${formatDate(record.record.end_time)}</div>
                                 </div>
-                                <div class="score ${isPass ? '' : 'fail'}">${record.record.score}/${record.record.total_score}</div>
+                                <div class="record-right">
+                                    <div class="score ${isPass ? '' : 'fail'}">${record.record.score}/${record.record.total_score}</div>
+                                    <button class="rank-btn" onclick="event.stopPropagation(); openRanking(${record.record.exam_id})">🏆 排行榜</button>
+                                </div>
                             </div>
                         `;
                     }).join('');
@@ -1378,6 +1700,123 @@
             } catch (e) {
                 // Ignore
             }
+        }
+
+        // ===== Ranking =====
+        async function openRanking(examId) {
+            const overlay = document.getElementById('rankingOverlay');
+            const body = document.getElementById('rankingBody');
+            const title = document.getElementById('rankingTitle');
+
+            // Show overlay with loading state
+            overlay.classList.add('show');
+            body.innerHTML = `
+                <div class="ranking-loading">
+                    <div class="spinner"></div>
+                    <p>加载中...</p>
+                </div>
+            `;
+
+            try {
+                const result = await API.getExamRanking(examId, user.id);
+                if (result.code === 200) {
+                    title.textContent = `🏆 ${result.data.exam_name} 排行榜`;
+                    renderRankings(result.data);
+                } else {
+                    body.innerHTML = `
+                        <div class="ranking-empty">
+                            <div class="icon">❌</div>
+                            <p>${result.message || '加载失败'}</p>
+                        </div>
+                    `;
+                }
+            } catch (err) {
+                body.innerHTML = `
+                    <div class="ranking-empty">
+                        <div class="icon">❌</div>
+                        <p>网络错误，请稍后重试</p>
+                    </div>
+                `;
+            }
+        }
+
+        function closeRanking() {
+            document.getElementById('rankingOverlay').classList.remove('show');
+        }
+
+        function renderRankings(data) {
+            const body = document.getElementById('rankingBody');
+            const { my_rank, rankings, total_score } = data;
+
+            let html = '';
+
+            // My rank card
+            html += '<div class="my-rank-card">';
+            html += '<div class="my-rank-label">我的排名</div>';
+            if (my_rank) {
+                const rankSuffix = getRankSuffix(my_rank.rank);
+                html += `
+                    <div class="my-rank-main">
+                        <div>
+                            <div class="my-rank-position">${my_rank.rank}<span class="rank-suffix">${rankSuffix}</span></div>
+                        </div>
+                        <div class="my-rank-score">
+                            <div class="score-value">${my_rank.score}<span class="score-total"> / ${total_score}</span></div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                html += '<div class="my-rank-empty">你还没有参加过这场考试</div>';
+            }
+            html += '</div>';
+
+            // Rankings list
+            if (rankings.length > 0) {
+                html += `
+                    <div class="ranking-list-header">
+                        <h4>全部排名</h4>
+                        <span class="total-count">共 ${rankings.length} 人</span>
+                    </div>
+                `;
+
+                rankings.forEach(item => {
+                    const isMe = my_rank && item.score === my_rank.score && item.end_time === my_rank.end_time && item.username === my_rank.username;
+                    const rankClass = item.rank === 1 ? 'top-1' : (item.rank === 2 ? 'top-2' : (item.rank === 3 ? 'top-3' : ''));
+                    const rankIcon = item.rank === 1 ? '🥇' : (item.rank === 2 ? '🥈' : (item.rank === 3 ? '🥉' : item.rank));
+
+                    // Format time to HH:MM
+                    let timeStr = '';
+                    if (item.end_time) {
+                        const d = new Date(item.end_time);
+                        timeStr = d.getHours().toString().padStart(2, '0') + ':' + d.getMinutes().toString().padStart(2, '0');
+                    }
+
+                    html += `
+                        <div class="ranking-row ${isMe ? 'is-me' : ''}">
+                            <div class="rank-num ${rankClass}">${rankIcon}</div>
+                            <div class="rank-name">
+                                ${item.username}
+                                ${isMe ? '<span class="me-tag">我</span>' : ''}
+                            </div>
+                            <div class="rank-score">${item.score}<span class="rank-total">/${total_score}</span></div>
+                            <div class="rank-time">${timeStr}</div>
+                        </div>
+                    `;
+                });
+            } else {
+                html += `
+                    <div class="ranking-empty">
+                        <div class="icon">📭</div>
+                        <p>暂无考试数据</p>
+                    </div>
+                `;
+            }
+
+            body.innerHTML = html;
+        }
+
+        function getRankSuffix(rank) {
+            return '名';
         }
 
         // Init

@@ -466,6 +466,86 @@ def delete_exam(exam_id):
     })
 
 
+@bp.route('/exam/<int:exam_id>/ranking', methods=['GET'])
+def get_exam_ranking(exam_id):
+    """获取某场考试的排行榜"""
+    user_id = request.args.get('user_id')
+
+    exam = Exam.query.get(exam_id)
+    if not exam:
+        return jsonify({'code': 404, 'message': '考试不存在'}), 404
+
+    # 查询该考试所有已完成的记录
+    records = ExamRecord.query.filter_by(exam_id=exam_id) \
+        .filter(ExamRecord.end_time.isnot(None)) \
+        .order_by(ExamRecord.score.desc(), ExamRecord.end_time.asc()) \
+        .all()
+
+    if not records:
+        return jsonify({
+            'code': 200,
+            'data': {
+                'exam_name': exam.exam_name,
+                'total_score': exam.total_score,
+                'my_rank': None,
+                'rankings': []
+            }
+        })
+
+    # 每个用户只取最高分（同分取最早完成的）
+    best_by_user = {}
+    for r in records:
+        uid = r.user_id
+        if uid not in best_by_user or r.score > best_by_user[uid].score or \
+           (r.score == best_by_user[uid].score and r.end_time < best_by_user[uid].end_time):
+            best_by_user[uid] = r
+
+    # 按分数降序、完成时间升序排列
+    best_records = sorted(best_by_user.values(), key=lambda r: (-r.score, r.end_time))
+
+    # 批量查询用户信息
+    user_ids = list(best_by_user.keys())
+    users = User.query.filter(User.id.in_(user_ids)).all()
+    users_map = {u.id: u for u in users}
+
+    # 构建排名列表（同分同名次）
+    rankings = []
+    my_rank = None
+    prev_score = None
+    prev_rank = 0
+
+    for idx, record in enumerate(best_records):
+        if record.score == prev_score:
+            rank = prev_rank
+        else:
+            rank = idx + 1
+            prev_rank = rank
+        prev_score = record.score
+
+        user = users_map.get(record.user_id)
+        entry = {
+            'rank': rank,
+            'username': user.username if user else '未知用户',
+            'score': record.score,
+            'total_score': record.total_score,
+            'end_time': record.end_time.strftime('%Y-%m-%d %H:%M:%S') if record.end_time else None
+        }
+        rankings.append(entry)
+
+        if user_id and record.user_id == int(user_id):
+            my_rank = entry
+
+    return jsonify({
+        'code': 200,
+        'data': {
+            'exam_name': exam.exam_name,
+            'total_score': exam.total_score,
+            'my_rank': my_rank,
+            'rankings': rankings
+        }
+    })
+
+
 @bp.route('/wrong_questions', methods=['GET'])
 def get_wrong_questions():
     """获取用户的错题列表"""
